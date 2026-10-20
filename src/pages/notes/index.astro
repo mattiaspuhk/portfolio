@@ -1,0 +1,32 @@
+---
+import NoteItem from '@/components/notes/NoteItem.astro';
+import { site } from '@/config/site';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { byPublishedDesc, getPublished } from '@/lib/content';
+
+const notes = (await getPublished('notes')).sort(byPublishedDesc);
+const years = Map.groupBy(notes, (note) => note.data.published.getUTCFullYear());
+const { title, description } = site.pages.notes;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="flex flex-col gap-(--space-xl) py-(--space-lg)">
+    <h1 class="text-3xl">{title}</h1>
+    {
+      [...years].map(([year, items]) => (
+        <section class="flex flex-col gap-(--space-md)" aria-labelledby={`notes-${year}`}>
+          <h2 id={`notes-${year}`} class="text-xl text-muted">
+            {year}
+          </h2>
+          <ul class="flex flex-col gap-(--space-md)">
+            {items.map((entry) => (
+              <li>
+                <NoteItem entry={entry} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>

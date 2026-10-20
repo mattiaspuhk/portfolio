@@ -6,18 +6,27 @@ import BaseLayout from './BaseLayout.astro';
 interface Props {
   title: string;
   description: string;
+  /** Notes only. */
+  published?: Date;
   updated?: Date;
   ogImage?: string;
   noindex?: boolean;
 }
 
-const { title, description, updated, ogImage, noindex } = Astro.props;
+const { title, description, published, updated, ogImage, noindex } = Astro.props;
 ---
 
 <BaseLayout title={title} description={description} ogImage={ogImage} noindex={noindex}>
   <article class="flex flex-col gap-(--space-lg) py-(--space-lg)">
     <header class="flex flex-col gap-(--space-xs)">
       <h1 class="text-3xl">{title}</h1>
+      {
+        published && (
+          <time datetime={isoDate(published)} class="text-sm text-muted">
+            {formatDate(published)}
+          </time>
+        )
+      }
       {
         updated && (
           <p class="text-sm text-muted">

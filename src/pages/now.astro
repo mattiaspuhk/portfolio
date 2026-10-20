@@ -1,0 +1,16 @@
+---
+import { getEntry, render } from 'astro:content';
+import { mdxComponents } from '@/components/mdx';
+import ProseLayout from '@/layouts/ProseLayout.astro';
+
+const now = await getEntry('pages', 'now');
+if (!now) throw new Error('[now] src/content/pages/now.mdx is missing.');
+if (!now.data.updated) {
+  throw new Error('[now] src/content/pages/now.mdx needs an `updated` date in its frontmatter.');
+}
+const { Content } = await render(now);
+---
+
+<ProseLayout title={now.data.title} description={now.data.description} updated={now.data.updated}>
+  <Content components={mdxComponents} />
+</ProseLayout>

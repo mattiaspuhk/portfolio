@@ -1,6 +1,91 @@
 ---
+import { getEntry, render } from 'astro:content';
+import { mdxComponents } from '@/components/mdx';
+import NoteItem from '@/components/notes/NoteItem.astro';
+import ProofPoints from '@/components/work/ProofPoints.astro';
+import WorkCard from '@/components/work/WorkCard.astro';
 import { site } from '@/config/site';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { byOrder, byPublishedDesc, getPublished } from '@/lib/content';
+import { formatDate, isoDate } from '@/lib/format';
+
+const work = (await getPublished('work')).sort(byOrder);
+const proof = (await getPublished('proof')).sort(byOrder);
+const notes = (await getPublished('notes')).sort(byPublishedDesc).slice(0, 3);
+const now = await getEntry('pages', 'now');
+const NowContent = now && (await render(now)).Content;
+const { home: labels } = site.labels;
 ---
 
-<BaseLayout title={site.name} description={site.description} />
+<BaseLayout title={site.name} description={site.description}>
+  <div class="flex flex-col gap-(--space-2xl) py-(--space-xl)">
+    <section class="flex flex-col gap-(--space-sm)">
+      <h1 class="text-3xl">{labels.introTitle}</h1>
+      <p class="max-w-(--measure)">{labels.intro}</p>
+    </section>
+
+    {
+      work.length > 0 && (
+        <section class="flex flex-col gap-(--space-md)" aria-labelledby="home-work">
+          <h2 id="home-work" class="text-2xl">
+            <a href="/work">{labels.work}</a>
+          </h2>
+          <ul class="flex flex-col gap-(--space-lg)">
+            {work.map((entry) => (
+              <li>
+                <WorkCard entry={entry} headingLevel={3} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      proof.length > 0 && (
+        <section class="flex flex-col gap-(--space-md)" aria-labelledby="home-proof">
+          <h2 id="home-proof" class="text-2xl">
+            {labels.proof}
+          </h2>
+          <ProofPoints items={proof} />
+        </section>
+      )
+    }
+
+    {
+      now && NowContent && (
+        <section class="flex flex-col gap-(--space-md)" aria-labelledby="home-now">
+          <h2 id="home-now" class="text-2xl">
+            <a href="/now">{labels.now}</a>
+          </h2>
+          {now.data.updated && (
+            <p class="text-sm text-muted">
+              {site.labels.updated}{' '}
+              <time datetime={isoDate(now.data.updated)}>{formatDate(now.data.updated)}</time>
+            </p>
+          )}
+          <div class="prose">
+            <NowContent components={mdxComponents} />
+          </div>
+        </section>
+      )
+    }
+
+    {
+      notes.length > 0 && (
+        <section class="flex flex-col gap-(--space-md)" aria-labelledby="home-notes">
+          <h2 id="home-notes" class="text-2xl">
+            <a href="/notes">{labels.notes}</a>
+          </h2>
+          <ul class="flex flex-col gap-(--space-md)">
+            {notes.map((entry) => (
+              <li>
+                <NoteItem entry={entry} headingLevel={3} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>

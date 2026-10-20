@@ -1,0 +1,30 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import { mdxComponents } from '@/components/mdx';
+import CaseStudyLayout from '@/layouts/CaseStudyLayout.astro';
+import { assertBeats } from '@/lib/beats';
+import { getAdjacentWork, getPublished } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const work = await getPublished('work');
+  return work.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+}
+
+const { entry } = Astro.props;
+const { Content, headings, remarkPluginFrontmatter } = await render(entry);
+assertBeats(headings, entry.filePath ?? entry.id);
+const { prev, next } = await getAdjacentWork(entry.id);
+---
+
+<CaseStudyLayout
+  entry={entry}
+  minutesRead={remarkPluginFrontmatter.minutesRead}
+  prev={prev}
+  next={next}
+>
+  <Content components={mdxComponents} />
+</CaseStudyLayout>

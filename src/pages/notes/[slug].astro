@@ -1,0 +1,23 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import { mdxComponents } from '@/components/mdx';
+import ProseLayout from '@/layouts/ProseLayout.astro';
+import { getPublished } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const notes = await getPublished('notes');
+  return notes.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props {
+  entry: CollectionEntry<'notes'>;
+}
+
+const { entry } = Astro.props;
+const { title, description, published, updated } = entry.data;
+const { Content } = await render(entry);
+---
+
+<ProseLayout title={title} description={description} published={published} updated={updated}>
+  <Content components={mdxComponents} />
+</ProseLayout>

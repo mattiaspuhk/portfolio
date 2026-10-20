@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import { site } from '@/config/site';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { byOrder } from '@/lib/content';
+import { formatRange, formatYearMonth } from '@/lib/format';
+
+const entries = (await getCollection('cv')).sort(byOrder);
+const { cv: labels } = site.labels;
+const sections = (['experience', 'education', 'skills'] as const)
+  .map((key) => ({
+    key,
+    label: labels[key],
+    items: entries.filter((entry) => entry.data.section === key),
+  }))
+  .filter((section) => section.items.length > 0);
+const { title, description } = site.pages.cv;
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="flex flex-col gap-(--space-xl) py-(--space-lg)">
+    <header class="flex flex-wrap items-baseline justify-between gap-(--space-sm)">
+      <h1 class="text-3xl">{title}</h1>
+      <a href="/cv.pdf" download class="print:hidden">{labels.download}</a>
+    </header>
+
+    {
+      sections.map((section) => (
+        <section class="flex flex-col gap-(--space-md)" aria-labelledby={`cv-${section.key}`}>
+          <h2 id={`cv-${section.key}`} class="text-2xl">
+            {section.label}
+          </h2>
+          <ul class="flex flex-col gap-(--space-md)">
+            {section.items.map(({ data }) => (
+              <li class="flex flex-col gap-(--space-xs)">
+                <h3 class="text-lg">{data.title}</h3>
+                {(data.org || data.location || data.start) && (
+                  <p class="flex flex-wrap gap-x-(--space-sm) text-sm text-muted">
+                    {data.org && <span>{data.org}</span>}
+                    {data.location && <span>{data.location}</span>}
+                    {data.start && (
+                      <span>
+                        {formatRange(
+                          formatYearMonth(data.start),
+                          data.end && formatYearMonth(data.end),
+                          site.labels.present,
+                        )}
+                      </span>
+                    )}
+                  </p>
+                )}
+                {data.bullets.length > 0 && (
+                  <ul class="list-disc ps-(--space-lg)">
+                    {data.bullets.map((bullet) => (
+                      <li>{bullet}</li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </article>
+</BaseLayout>

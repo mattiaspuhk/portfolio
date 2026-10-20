@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+.env*
+.DS_Store
+_private/
+
+# Original CV export kept in the root; the committed copy is public/cv.pdf
+/Curriculum Vitae Mattias Puhk.pdf

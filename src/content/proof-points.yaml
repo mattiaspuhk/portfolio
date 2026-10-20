@@ -1,0 +1,26 @@
+# Platform proof points, shown on /. `hidden: true` keeps an entry out of production builds.
+# TODO(mattias): `year: 0` is a placeholder on every entry.
+
+- id: org-identity
+  title: Unified organisation identity
+  detail: 'TODO(mattias)'
+  year: 0
+  order: 1
+
+- id: cloud-tasks
+  title: Email jobs moved from BullMQ to Cloud Tasks
+  detail: 'TODO(mattias)'
+  year: 0
+  order: 2
+
+- id: nestjs-migration
+  title: NestJS migration
+  detail: 'TODO(mattias)'
+  year: 0
+  order: 3
+
+- id: design-system
+  title: Design system and virtualised DataTable
+  detail: 'TODO(mattias)'
+  year: 0
+  order: 4

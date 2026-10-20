@@ -1,0 +1,29 @@
+# CV entries for /cv. One example per section; copy an entry to add more.
+# `start` and `end` are "YYYY-MM"; leave `end` out for "present". `order` sorts within a section.
+
+- id: experience-example
+  section: experience
+  title: 'TODO(mattias)'
+  org: 'TODO(mattias)'
+  location: 'TODO(mattias)'
+  start: 'TODO(mattias)'
+  bullets:
+    - 'TODO(mattias)'
+  order: 1
+
+- id: education-example
+  section: education
+  title: 'TODO(mattias)'
+  org: 'TODO(mattias)'
+  location: 'TODO(mattias)'
+  start: 'TODO(mattias)'
+  end: 'TODO(mattias)'
+  bullets: []
+  order: 1
+
+- id: skills-example
+  section: skills
+  title: 'TODO(mattias)'
+  bullets:
+    - 'TODO(mattias)'
+  order: 1

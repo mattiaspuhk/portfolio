@@ -1,0 +1,28 @@
+/* Print, mainly for /cv: no site chrome, black text on white. */
+
+@media print {
+  .site-header,
+  .site-footer,
+  .theme-toggle,
+  .skip-link {
+    display: none !important;
+  }
+
+  :root,
+  :root[data-theme] {
+    color-scheme: light;
+    --color-bg: white;
+    --color-surface: white;
+    --color-text: black;
+    --color-muted: black;
+    --color-border: black;
+    --color-accent: black;
+    --color-accent-contrast: white;
+  }
+
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

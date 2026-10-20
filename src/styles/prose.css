@@ -1,0 +1,127 @@
+/*
+ * Rendered MDX. Structure only: every value comes from tokens.css.
+ * In the components layer so utility classes on MDX components still win.
+ */
+
+@layer components {
+  .prose {
+    max-width: var(--measure);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+  }
+
+  .prose > * + * {
+    margin-block-start: var(--space-md);
+  }
+
+  .prose h2 {
+    font-size: var(--text-2xl);
+    line-height: var(--leading-tight);
+    margin-block-start: var(--space-xl);
+    scroll-margin-block-start: var(--space-lg);
+  }
+
+  .prose h3 {
+    font-size: var(--text-xl);
+    line-height: var(--leading-tight);
+    margin-block-start: var(--space-lg);
+    scroll-margin-block-start: var(--space-lg);
+  }
+
+  .prose a {
+    color: var(--color-accent);
+    text-decoration-line: underline;
+  }
+
+  .prose ul {
+    list-style-type: disc;
+  }
+
+  .prose ol {
+    list-style-type: decimal;
+  }
+
+  .prose :is(ul, ol) {
+    padding-inline-start: var(--space-lg);
+  }
+
+  .prose li + li {
+    margin-block-start: var(--space-xs);
+  }
+
+  .prose blockquote {
+    border-inline-start: var(--border-width) solid var(--color-border);
+    padding-inline-start: var(--space-md);
+    color: var(--color-muted);
+  }
+
+  .prose :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-sm);
+    padding-inline: var(--space-xs);
+  }
+
+  .prose pre {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+  }
+
+  .prose figure img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .prose figcaption {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-block-start: var(--space-xs);
+  }
+
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .prose :is(th, td) {
+    border-block-end: var(--border-width) solid var(--color-border);
+    padding: var(--space-xs) var(--space-sm);
+    text-align: start;
+  }
+
+  .prose hr {
+    border-color: var(--color-border);
+  }
+}
+
+/*
+ * Shiki dual themes (light/dark in astro.config.mjs). Light colors are inline;
+ * swap to the dark ones when the dark theme is active. Screen only, so print uses light.
+ */
+@media screen {
+  [data-theme='dark'] .astro-code,
+  [data-theme='dark'] .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .astro-code,
+  :root:not([data-theme]) .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+}

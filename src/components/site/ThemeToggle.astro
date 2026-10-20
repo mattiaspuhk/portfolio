@@ -1,0 +1,43 @@
+---
+interface Props {
+  /** Accessible name. The button is pressed while the dark theme is active. */
+  label: string;
+  class?: string;
+}
+
+const { label, class: className } = Astro.props;
+---
+
+<button
+  type="button"
+  class:list={['theme-toggle cursor-pointer', className]}
+  aria-label={label}
+  aria-pressed="false"
+  data-theme-toggle
+>
+  <slot>{label}</slot>
+</button>
+
+<script>
+  // Storage key must match the theme-init script in BaseLayout.astro.
+  const root = document.documentElement;
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+
+  const sync = () => {
+    const pressed = String(root.dataset.theme === 'dark');
+    buttons.forEach((button) => button.setAttribute('aria-pressed', pressed));
+  };
+
+  buttons.forEach((button) =>
+    button.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {}
+      sync();
+    }),
+  );
+
+  sync();
+</script>

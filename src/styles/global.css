@@ -1,0 +1,33 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import './prose.css';
+@import './print.css';
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@layer base {
+  html {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-accent);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* The toggle can't work without JS. The init script sets data-theme before first paint. */
+  html:not([data-theme]) .theme-toggle {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

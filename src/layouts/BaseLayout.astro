@@ -1,0 +1,26 @@
+---
+import '@/styles/global.css';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Theme init: set data-theme before first paint. Key must match ThemeToggle.astro.
+      (() => {
+        let theme;
+        try {
+          theme = localStorage.getItem('theme');
+        } catch {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

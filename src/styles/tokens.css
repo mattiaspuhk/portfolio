@@ -1,0 +1,119 @@
+/*
+ * Design tokens: the single source of truth for every design value.
+ * Every value in this file is a neutral placeholder. TODO(mattias): replace with the real design.
+ *
+ * Tailwind namespaces (color, text, leading, radius) live in @theme so utilities read them.
+ * Tailwind's defaults for those namespaces are reset with `initial`, so only these tokens exist.
+ * Tokens with no Tailwind namespace live on :root; use them as `max-w-(--measure)`, `gap-(--space-md)`.
+ */
+
+@theme {
+  /* Color: semantic names only. Light values here, dark overrides further down. */
+  --color-*: initial;
+  --color-bg: #ffffff; /* TODO(mattias) */
+  --color-surface: #f4f4f4; /* TODO(mattias) */
+  --color-text: #111111; /* TODO(mattias) */
+  --color-muted: #595959; /* TODO(mattias) */
+  --color-border: #d4d4d4; /* TODO(mattias) */
+  --color-accent: #0000ee; /* TODO(mattias) */
+  --color-accent-contrast: #ffffff; /* TODO(mattias) */
+
+  /* Type scale, xs → 3xl. Each size carries a default line height. */
+  --text-*: initial;
+  --text-xs: 0.75rem; /* TODO(mattias) */
+  --text-xs--line-height: var(--leading-normal);
+  --text-sm: 0.875rem; /* TODO(mattias) */
+  --text-sm--line-height: var(--leading-normal);
+  --text-base: 1rem; /* TODO(mattias) */
+  --text-base--line-height: var(--leading-relaxed);
+  --text-lg: 1.125rem; /* TODO(mattias) */
+  --text-lg--line-height: var(--leading-normal);
+  --text-xl: 1.25rem; /* TODO(mattias) */
+  --text-xl--line-height: var(--leading-tight);
+  --text-2xl: 1.5rem; /* TODO(mattias) */
+  --text-2xl--line-height: var(--leading-tight);
+  --text-3xl: 2rem; /* TODO(mattias) */
+  --text-3xl--line-height: var(--leading-tight);
+
+  /* Line heights */
+  --leading-*: initial;
+  --leading-tight: 1.25; /* TODO(mattias) */
+  --leading-normal: 1.5; /* TODO(mattias) */
+  --leading-relaxed: 1.7; /* TODO(mattias) */
+
+  /* Radius */
+  --radius-*: initial;
+  --radius-sm: 0.25rem; /* TODO(mattias) */
+  --radius-md: 0.5rem; /* TODO(mattias) */
+
+  /* Base unit for Tailwind's numeric spacing utilities (p-4 = 4 × this) */
+  --spacing: 0.25rem; /* TODO(mattias) */
+
+  /* Transition utilities default to the motion tokens */
+  --default-transition-duration: var(--dur-base);
+  --default-transition-timing-function: var(--ease);
+}
+
+/* The Fonts API (see astro.config.mjs) defines --font-body and --font-code. */
+@theme inline {
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-code);
+}
+
+:root {
+  color-scheme: light;
+
+  /* Prose width */
+  --measure: 65ch; /* TODO(mattias) */
+
+  /* Spacing rhythm */
+  --space-xs: 0.5rem; /* TODO(mattias) */
+  --space-sm: 0.75rem; /* TODO(mattias) */
+  --space-md: 1.25rem; /* TODO(mattias) */
+  --space-lg: 2rem; /* TODO(mattias) */
+  --space-xl: 3rem; /* TODO(mattias) */
+  --space-2xl: 5rem; /* TODO(mattias) */
+
+  /* Lines and focus */
+  --border-width: 1px; /* TODO(mattias) */
+  --focus-ring-width: 2px; /* TODO(mattias) */
+  --focus-ring-offset: 2px; /* TODO(mattias) */
+
+  /* Motion */
+  --ease: ease-out; /* TODO(mattias) */
+  --dur-fast: 120ms; /* TODO(mattias) */
+  --dur-base: 200ms; /* TODO(mattias) */
+}
+
+/* Dark theme. Keep these two blocks identical. */
+[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #111111; /* TODO(mattias) */
+  --color-surface: #1c1c1c; /* TODO(mattias) */
+  --color-text: #eeeeee; /* TODO(mattias) */
+  --color-muted: #a6a6a6; /* TODO(mattias) */
+  --color-border: #3a3a3a; /* TODO(mattias) */
+  --color-accent: #9e9eff; /* TODO(mattias) */
+  --color-accent-contrast: #000000; /* TODO(mattias) */
+}
+
+/* No-JS fallback: the theme-init script never ran, so follow the system setting. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-bg: #111111; /* TODO(mattias) */
+    --color-surface: #1c1c1c; /* TODO(mattias) */
+    --color-text: #eeeeee; /* TODO(mattias) */
+    --color-muted: #a6a6a6; /* TODO(mattias) */
+    --color-border: #3a3a3a; /* TODO(mattias) */
+    --color-accent: #9e9eff; /* TODO(mattias) */
+    --color-accent-contrast: #000000; /* TODO(mattias) */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+  }
+}

@@ -57,7 +57,6 @@ export const site = {
     notes: { title: TODO, description: TODO },
     cv: { title: TODO, description: TODO },
     notFound: { title: TODO, description: TODO, body: TODO, homeLink: TODO },
-    rss: { title: TODO, description: TODO },
   },
 } as const;
 

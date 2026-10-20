@@ -1,0 +1,51 @@
+---
+import { site } from '@/config/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path under public/. Defaults to the placeholder og/default.png (1200×630). */
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const { title, description, ogImage = '/og/default.png', noindex = false } = Astro.props;
+
+const fullTitle = title === site.name ? site.name : `${title} · ${site.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const image = new URL(ogImage, Astro.site);
+const isHome = Astro.url.pathname === '/';
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  url: site.url,
+  ...(site.email ? { email: site.email } : {}),
+  sameAs: site.socials.map((social) => social.href).filter(Boolean),
+};
+// Keep "</script>" in values from closing the tag early.
+const personJson = JSON.stringify(person).replace(/</g, '\\u003c');
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex" />}
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="alternate" type="application/rss+xml" title={site.name} href="/rss.xml" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={image} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+
+{isHome && <script type="application/ld+json" set:html={personJson} />}

@@ -1,0 +1,5 @@
+# TODO(mattias): replace example.com when `site` in astro.config.mjs gets the final domain.
+User-agent: *
+Allow: /
+
+Sitemap: https://example.com/sitemap-index.xml

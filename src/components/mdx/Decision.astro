@@ -1,0 +1,35 @@
+---
+import { site } from '@/config/site';
+
+interface Props {
+  title: string;
+  options: string[];
+  chose: string;
+}
+
+const { title, options, chose } = Astro.props;
+const { decision: labels } = site.labels;
+---
+
+<div class="decision">
+  <h3>{title}</h3>
+  <dl>
+    {
+      options.length > 0 && (
+        <>
+          <dt class="text-sm text-muted">{labels.options}</dt>
+          <dd>
+            <ul>
+              {options.map((option) => (
+                <li>{option}</li>
+              ))}
+            </ul>
+          </dd>
+        </>
+      )
+    }
+    <dt class="text-sm text-muted">{labels.chose}</dt>
+    <dd>{chose}</dd>
+  </dl>
+  <slot />
+</div>

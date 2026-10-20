@@ -1,0 +1,28 @@
+---
+import { site } from '@/config/site';
+
+type Props = Record<string, never>;
+
+const links = [
+  ...(site.email ? [{ label: site.labels.email, href: `mailto:${site.email}` }] : []),
+  ...site.socials.filter((social) => social.href),
+];
+---
+
+<footer class="site-footer mx-auto w-full max-w-(--page-width) px-(--gutter) py-(--space-lg)">
+  {
+    links.length > 0 && (
+      <nav aria-label={site.labels.footerNav}>
+        <ul class="flex flex-wrap gap-(--space-md) text-sm text-muted">
+          {links.map((link) => (
+            <li>
+              <a href={link.href} class="hover:text-text">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
+  }
+</footer>

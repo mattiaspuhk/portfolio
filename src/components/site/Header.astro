@@ -1,0 +1,21 @@
+---
+import { site } from '@/config/site';
+import Nav from './Nav.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+---
+
+<header class="site-header mx-auto w-full max-w-(--page-width) px-(--gutter) py-(--space-md)">
+  <div class="flex flex-wrap items-center justify-between gap-(--space-sm)">
+    <a href="/">{site.name}</a>
+    <div class="flex flex-wrap items-center gap-(--space-md)">
+      <Nav items={site.nav} label={site.labels.mainNav} currentPath={currentPath} />
+      <ThemeToggle label={site.labels.themeToggle} />
+    </div>
+  </div>
+</header>

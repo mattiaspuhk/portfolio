@@ -16,7 +16,12 @@ export default defineConfig({
   fonts: [
     // TODO(mattias): placeholder families
     { provider: fontProviders.fontsource(), name: 'Inter', cssVariable: '--font-body' },
-    { provider: fontProviders.fontsource(), name: 'JetBrains Mono', cssVariable: '--font-code' },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-code',
+      fallbacks: ['monospace'], // Astro defaults to sans-serif
+    },
   ],
   vite: { plugins: [tailwindcss()] },
 });

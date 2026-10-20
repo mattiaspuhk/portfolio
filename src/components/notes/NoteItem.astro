@@ -1,0 +1,22 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, isoDate } from '@/lib/format';
+
+interface Props {
+  entry: CollectionEntry<'notes'>;
+  /** Heading level of the note title, to fit the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { entry, headingLevel = 3 } = Astro.props;
+const { title, description, published } = entry.data;
+const Heading = `h${headingLevel}` as const;
+---
+
+<article class="flex flex-col">
+  <Heading>
+    <a href={`/notes/${entry.id}`}>{title}</a>
+  </Heading>
+  <time datetime={isoDate(published)} class="text-sm text-muted">{formatDate(published)}</time>
+  <p class="text-sm">{description}</p>
+</article>

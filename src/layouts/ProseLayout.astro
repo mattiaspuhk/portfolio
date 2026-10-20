@@ -1,0 +1,33 @@
+---
+import { site } from '@/config/site';
+import { formatDate, isoDate } from '@/lib/format';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  updated?: Date;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const { title, description, updated, ogImage, noindex } = Astro.props;
+---
+
+<BaseLayout title={title} description={description} ogImage={ogImage} noindex={noindex}>
+  <article class="flex flex-col gap-(--space-lg) py-(--space-lg)">
+    <header class="flex flex-col gap-(--space-xs)">
+      <h1 class="text-3xl">{title}</h1>
+      {
+        updated && (
+          <p class="text-sm text-muted">
+            {site.labels.updated} <time datetime={isoDate(updated)}>{formatDate(updated)}</time>
+          </p>
+        )
+      }
+    </header>
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>

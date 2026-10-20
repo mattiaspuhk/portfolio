@@ -1,0 +1,26 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  items: CollectionEntry<'proof'>[];
+}
+
+const { items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <ul class="flex flex-col gap-(--space-sm)">
+      {items.map(({ data }) => (
+        <li class="flex flex-col">
+          <span class="flex flex-wrap items-baseline gap-x-(--space-sm)">
+            <span>{data.title}</span>
+            <span class="text-sm text-muted">{data.year}</span>
+            {data.metric && <span class="text-sm">{data.metric}</span>}
+          </span>
+          <span class="text-sm text-muted">{data.detail}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}

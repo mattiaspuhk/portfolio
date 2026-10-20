@@ -1,0 +1,29 @@
+---
+import { site } from '@/config/site';
+
+interface Props {
+  label: string;
+  before?: string;
+  after: string;
+  note?: string;
+}
+
+const { label, before, after, note } = Astro.props;
+const { metric: labels } = site.labels;
+---
+
+<span class="metric">
+  <span class="text-muted">{label}</span>
+  {
+    before && (
+      <>
+        <span class="sr-only">{labels.before}</span>
+        <span>{before}</span>
+        <span aria-hidden="true">→</span>
+      </>
+    )
+  }
+  <span class="sr-only">{labels.after}</span>
+  <strong>{after}</strong>
+  {note && <span class="text-sm text-muted">{note}</span>}
+</span>

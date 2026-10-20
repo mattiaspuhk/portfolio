@@ -1,0 +1,39 @@
+---
+interface Item {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  items: readonly Item[];
+  /** aria-label for the nav landmark. */
+  label: string;
+  currentPath: string;
+}
+
+const { items, label, currentPath } = Astro.props;
+
+const trim = (path: string) => path.replace(/\/+$/, '') || '/';
+const current = trim(currentPath);
+const isCurrent = (href: string) => current === href || current.startsWith(`${href}/`);
+---
+
+{
+  items.length > 0 && (
+    <nav aria-label={label}>
+      <ul class="flex flex-wrap gap-x-(--space-sm) gap-y-(--space-xs)">
+        {items.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              aria-current={isCurrent(item.href) ? 'page' : undefined}
+              class="text-muted hover:text-text aria-[current=page]:text-text"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}

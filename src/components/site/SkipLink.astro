@@ -1,0 +1,16 @@
+---
+interface Props {
+  label: string;
+  /** Id of the element to skip to. */
+  target?: string;
+}
+
+const { label, target = 'main' } = Astro.props;
+---
+
+<a
+  href={`#${target}`}
+  class="skip-link sr-only bg-bg text-text focus:not-sr-only focus:fixed focus:top-(--space-xs) focus:left-(--space-xs) focus:z-50 focus:px-(--space-sm) focus:py-(--space-xs)"
+>
+  {label}
+</a>

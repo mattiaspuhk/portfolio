@@ -1,0 +1,38 @@
+---
+interface Link {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  prev?: Link;
+  next?: Link;
+  /** aria-label for the nav landmark. */
+  label: string;
+  prevLabel: string;
+  nextLabel: string;
+}
+
+const { prev, next, label, prevLabel, nextLabel } = Astro.props;
+---
+
+{
+  (prev || next) && (
+    <nav aria-label={label} class="flex flex-wrap justify-between gap-(--space-md)">
+      {prev ? (
+        <a href={prev.href} rel="prev" class="flex flex-col">
+          <span class="text-sm text-muted">{prevLabel}</span>
+          <span>{prev.title}</span>
+        </a>
+      ) : (
+        <span />
+      )}
+      {next && (
+        <a href={next.href} rel="next" class="flex flex-col text-end">
+          <span class="text-sm text-muted">{nextLabel}</span>
+          <span>{next.title}</span>
+        </a>
+      )}
+    </nav>
+  )
+}

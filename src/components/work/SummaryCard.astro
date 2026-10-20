@@ -1,0 +1,59 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { site } from '@/config/site';
+import { formatPeriod } from '@/lib/format';
+import MetricList from './MetricList.astro';
+
+type Work = CollectionEntry<'work'>['data'];
+
+interface Props {
+  title: Work['title'];
+  org: Work['org'];
+  role: Work['role'];
+  period: Work['period'];
+  stack: Work['stack'];
+  metrics: Work['metrics'];
+  minutesRead: number;
+  tldr?: Work['tldr'];
+}
+
+const { title, org, role, period, stack, metrics, minutesRead, tldr } = Astro.props;
+const { summary: labels } = site.labels;
+---
+
+<header class="flex flex-col gap-(--space-md)">
+  <h1 class="text-3xl">{title}</h1>
+  <dl class="grid grid-cols-[auto_1fr] gap-x-(--space-md) gap-y-(--space-xs) text-sm">
+    <dt class="text-muted">{labels.org}</dt>
+    <dd>{org}</dd>
+    <dt class="text-muted">{labels.role}</dt>
+    <dd>{role}</dd>
+    <dt class="text-muted">{labels.period}</dt>
+    <dd>{formatPeriod(period, site.labels.present)}</dd>
+    {
+      stack.length > 0 && (
+        <>
+          <dt class="text-muted">{labels.stack}</dt>
+          <dd>
+            <ul class="flex flex-wrap gap-x-(--space-sm)">
+              {stack.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </dd>
+        </>
+      )
+    }
+    <dt class="text-muted">{labels.readTime}</dt>
+    <dd>{site.labels.readTime(minutesRead)}</dd>
+  </dl>
+  <MetricList metrics={metrics} />
+  {
+    tldr && (
+      <div>
+        <p class="text-sm text-muted">{labels.tldr}</p>
+        <p>{tldr}</p>
+      </div>
+    )
+  }
+</header>

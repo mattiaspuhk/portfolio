@@ -1,0 +1,56 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { site } from '@/config/site';
+import BeatNav from '@/components/work/BeatNav.astro';
+import Pager from '@/components/work/Pager.astro';
+import SummaryCard from '@/components/work/SummaryCard.astro';
+import BaseLayout from './BaseLayout.astro';
+
+type Work = CollectionEntry<'work'>;
+
+interface Props {
+  entry: Work;
+  minutesRead: number;
+  prev?: Work;
+  next?: Work;
+}
+
+const { entry, minutesRead, prev, next } = Astro.props;
+const { title, summary, org, role, period, stack, metrics, tldr, disclosure } = entry.data;
+const toLink = (work?: Work) => work && { href: `/work/${work.id}`, title: work.data.title };
+---
+
+<BaseLayout title={title} description={summary}>
+  <article class="flex flex-col gap-(--space-xl) py-(--space-lg)">
+    <SummaryCard
+      title={title}
+      org={org}
+      role={role}
+      period={period}
+      stack={stack}
+      metrics={metrics}
+      minutesRead={minutesRead}
+      tldr={tldr}
+    />
+    {
+      disclosure === 'mock-data' && (
+        <p role="note" class="rounded-md border border-border bg-surface p-(--space-sm) text-sm">
+          {site.labels.mockDataNotice}
+        </p>
+      )
+    }
+    <div class="flex flex-col gap-(--space-lg) lg:grid lg:grid-cols-[auto_1fr] lg:gap-(--space-xl)">
+      <BeatNav label={site.labels.beatNav} />
+      <div class="prose">
+        <slot />
+      </div>
+    </div>
+    <Pager
+      prev={toLink(prev)}
+      next={toLink(next)}
+      label={site.labels.pager.label}
+      prevLabel={site.labels.pager.prev}
+      nextLabel={site.labels.pager.next}
+    />
+  </article>
+</BaseLayout>

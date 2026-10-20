@@ -1,0 +1,58 @@
+---
+import { BEATS } from '@/lib/beats';
+
+interface Props {
+  /** aria-label for the nav landmark. */
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<nav
+  aria-label={label}
+  data-beat-nav
+  class="overflow-x-auto lg:sticky lg:top-(--space-lg) lg:self-start lg:overflow-visible"
+>
+  <ol class="flex gap-(--space-sm) whitespace-nowrap lg:flex-col lg:gap-(--space-xs)">
+    {
+      BEATS.map((beat) => (
+        <li>
+          <a
+            href={`#${beat.slug}`}
+            class="text-sm text-muted hover:text-text aria-[current=location]:text-text"
+          >
+            {beat.label}
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<script>
+  // Marks the beat whose heading most recently crossed into the top of the viewport.
+  const nav = document.querySelector<HTMLElement>('[data-beat-nav]');
+  if (nav) {
+    const links = [...nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+    const setActive = (id: string) =>
+      links.forEach((link) =>
+        link.hash === `#${id}`
+          ? link.setAttribute('aria-current', 'location')
+          : link.removeAttribute('aria-current'),
+      );
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const hit = entries.find((entry) => entry.isIntersecting);
+        if (hit) setActive(hit.target.id);
+      },
+      { rootMargin: '0px 0px -70% 0px' },
+    );
+
+    for (const link of links) {
+      const heading = document.getElementById(decodeURIComponent(link.hash.slice(1)));
+      if (heading) observer.observe(heading);
+    }
+  }
+</script>

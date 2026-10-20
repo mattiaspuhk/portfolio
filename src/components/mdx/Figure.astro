@@ -1,0 +1,31 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { site } from '@/config/site';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  /** Marks the screenshot as mock data. Required for GAIA screenshots. */
+  mock?: boolean;
+}
+
+const { src, alt, caption, mock = false } = Astro.props;
+---
+
+<figure>
+  <Image src={src} alt={alt} />
+  {
+    (caption || mock) && (
+      <figcaption>
+        {mock && (
+          <span class="me-(--space-xs) rounded-sm border border-border px-(--space-xs) text-xs">
+            {site.labels.mockData}
+          </span>
+        )}
+        {caption}
+      </figcaption>
+    )
+  }
+</figure>

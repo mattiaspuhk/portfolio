@@ -1,5 +1,6 @@
 ---
+import { site } from '@/config/site';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 ---
 
-<BaseLayout />
+<BaseLayout title={site.name} description={site.description} />

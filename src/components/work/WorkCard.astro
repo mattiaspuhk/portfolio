@@ -1,0 +1,31 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import { site } from '@/config/site';
+import { formatPeriod } from '@/lib/format';
+import MetricList from './MetricList.astro';
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+  /** Heading level of the card title, to fit the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { entry, headingLevel = 2 } = Astro.props;
+const { title, summary, org, period, metrics } = entry.data;
+const { remarkPluginFrontmatter } = await render(entry);
+const minutesRead = remarkPluginFrontmatter.minutesRead as number;
+const Heading = `h${headingLevel}` as const;
+---
+
+<article class="flex flex-col gap-(--space-xs)">
+  <Heading class="text-xl">
+    <a href={`/work/${entry.id}`}>{title}</a>
+  </Heading>
+  <p>{summary}</p>
+  <p class="flex flex-wrap gap-x-(--space-sm) text-sm text-muted">
+    <span>{org}</span>
+    <span>{formatPeriod(period, site.labels.present)}</span>
+    <span>{site.labels.readTime(minutesRead)}</span>
+  </p>
+  <MetricList metrics={metrics.slice(0, 2)} class="text-sm" />
+</article>

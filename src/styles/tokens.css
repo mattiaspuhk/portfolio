@@ -63,8 +63,10 @@
 :root {
   color-scheme: light;
 
-  /* Prose width */
+  /* Widths: prose measure, page container and its side gutter */
   --measure: 65ch; /* TODO(mattias) */
+  --page-width: 64rem; /* TODO(mattias) */
+  --gutter: 1.25rem; /* TODO(mattias) */
 
   /* Spacing rhythm */
   --space-xs: 0.5rem; /* TODO(mattias) */

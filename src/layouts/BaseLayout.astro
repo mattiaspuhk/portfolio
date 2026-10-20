@@ -1,11 +1,30 @@
 ---
+import { Font } from 'astro:assets';
+import { site } from '@/config/site';
+import Footer from '@/components/site/Footer.astro';
+import Header from '@/components/site/Header.astro';
+import SkipLink from '@/components/site/SkipLink.astro';
 import '@/styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path under public/, e.g. "/og/work.png". */
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const { title, description } = Astro.props;
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <Font cssVariable="--font-body" preload={[{ style: 'normal' }]} />
+    <Font cssVariable="--font-code" />
     <script is:inline>
       // Theme init: set data-theme before first paint. Key must match ThemeToggle.astro.
       (() => {
@@ -20,7 +39,12 @@ import '@/styles/global.css';
       })();
     </script>
   </head>
-  <body>
-    <slot />
+  <body class="flex min-h-dvh flex-col">
+    <SkipLink label={site.labels.skipLink} />
+    <Header currentPath={Astro.url.pathname} />
+    <main id="main" tabindex="-1" class="mx-auto w-full max-w-(--page-width) flex-1 px-(--gutter)">
+      <slot />
+    </main>
+    <Footer />
   </body>
 </html>

@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Metric from '@/components/mdx/Metric.astro';
+
+interface Props {
+  metrics: CollectionEntry<'work'>['data']['metrics'];
+  class?: string;
+}
+
+const { metrics, class: className } = Astro.props;
+---
+
+{
+  metrics.length > 0 && (
+    <ul class:list={['flex flex-col gap-(--space-xs)', className]}>
+      {metrics.map((metric) => (
+        <li>
+          <Metric {...metric} />
+        </li>
+      ))}
+    </ul>
+  )
+}

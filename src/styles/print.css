@@ -4,7 +4,8 @@
   .site-header,
   .site-footer,
   .theme-toggle,
-  .skip-link {
+  .skip-link,
+  body::before {
     display: none !important;
   }
 

@@ -1,0 +1,30 @@
+/*
+ * The page canvas, behind every page: a dot grid that stays put while the page scrolls over it.
+ * The dots are cut from a wash of colour, so near the top-left they catch the same light as the
+ * bento field, and they go quiet behind the reading column so text never sits on a busy ground.
+ * Structure only: every value comes from tokens.css.
+ */
+
+@layer base {
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(var(--dots-light-reach) at 0% 0%, var(--dots-light), transparent),
+      var(--dots-color);
+    /* Dots, centred on the column, kept only where the second layer lets them through. */
+    mask:
+      radial-gradient(circle, #000 var(--dots-size), transparent calc(var(--dots-size) + 0.5px))
+        50% 0 / var(--dots-gap) var(--dots-gap) intersect,
+      linear-gradient(
+        to right,
+        #000,
+        rgb(0 0 0 / var(--dots-quiet)) max(15%, 50% - var(--page-width) / 2),
+        rgb(0 0 0 / var(--dots-quiet)) min(85%, 50% + var(--page-width) / 2),
+        #000
+      );
+  }
+}

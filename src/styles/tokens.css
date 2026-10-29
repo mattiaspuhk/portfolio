@@ -85,6 +85,20 @@
   --ease: ease-out; /* TODO(mattias) */
   --dur-fast: 120ms; /* TODO(mattias) */
   --dur-base: 200ms; /* TODO(mattias) */
+
+  /* The bento's edge light, which the page canvas's dots catch too. */
+  --glow-edge: #8eaaf7; /* TODO(mattias) */
+
+  /*
+   * Page canvas (canvas.css): a dot grid behind every page. The dots catch a light in the
+   * top-left corner (light, reach), and keep this much of themselves behind the column (quiet).
+   */
+  --dots-size: 1px; /* TODO(mattias) */
+  --dots-gap: 1.5rem; /* TODO(mattias) */
+  --dots-color: color-mix(in oklab, var(--color-text) 16%, var(--color-bg)); /* TODO(mattias) */
+  --dots-light: var(--glow-edge); /* TODO(mattias) */
+  --dots-light-reach: 65% 55%; /* TODO(mattias) */
+  --dots-quiet: 45%; /* TODO(mattias) */
 }
 
 /* Dark theme. Keep these two blocks identical. */
@@ -97,6 +111,9 @@
   --color-border: #3a3a3a; /* TODO(mattias) */
   --color-accent: #9e9eff; /* TODO(mattias) */
   --color-accent-contrast: #000000; /* TODO(mattias) */
+  --glow-edge: #5378f2; /* TODO(mattias) */
+  --dots-color: color-mix(in oklab, var(--color-text) 14%, var(--color-bg)); /* TODO(mattias) */
+  --dots-light: color-mix(in oklab, var(--glow-edge) 70%, var(--color-bg)); /* TODO(mattias) */
 }
 
 /* No-JS fallback: the theme-init script never ran, so follow the system setting. */
@@ -110,6 +127,9 @@
     --color-border: #3a3a3a; /* TODO(mattias) */
     --color-accent: #9e9eff; /* TODO(mattias) */
     --color-accent-contrast: #000000; /* TODO(mattias) */
+    --glow-edge: #5378f2; /* TODO(mattias) */
+    --dots-color: color-mix(in oklab, var(--color-text) 14%, var(--color-bg)); /* TODO(mattias) */
+    --dots-light: color-mix(in oklab, var(--glow-edge) 70%, var(--color-bg)); /* TODO(mattias) */
   }
 }
 

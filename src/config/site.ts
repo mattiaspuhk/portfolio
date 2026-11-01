@@ -35,6 +35,7 @@ export const site = {
     present: TODO, // end of a period with no end date
     mockData: TODO, // small label on <Figure mock>
     mockDataNotice: TODO, // notice on case studies with `disclosure: mock-data`
+    concept: 'TODO(mattias)', // notice on case studies with `disclosure: concept`
     beatNav: TODO, // aria-label of the case study beat nav
     pager: { label: TODO, prev: TODO, next: TODO },
     summary: { org: TODO, role: TODO, period: TODO, stack: TODO, readTime: TODO, tldr: TODO },

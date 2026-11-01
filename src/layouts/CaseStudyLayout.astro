@@ -18,6 +18,8 @@ interface Props {
 const { entry, minutesRead, prev, next } = Astro.props;
 const { title, summary, org, role, period, stack, metrics, tldr, disclosure } = entry.data;
 const toLink = (work?: Work) => work && { href: `/work/${work.id}`, title: work.data.title };
+const notices = { 'mock-data': site.labels.mockDataNotice, concept: site.labels.concept };
+const notice = disclosure && notices[disclosure];
 ---
 
 <BaseLayout title={title} description={summary}>
@@ -33,9 +35,9 @@ const toLink = (work?: Work) => work && { href: `/work/${work.id}`, title: work.
       tldr={tldr}
     />
     {
-      disclosure === 'mock-data' && (
+      notice && (
         <p role="note" class="rounded-md border border-border bg-surface p-(--space-sm) text-sm">
-          {site.labels.mockDataNotice}
+          {notice}
         </p>
       )
     }

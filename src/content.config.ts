@@ -25,7 +25,7 @@ const work = defineCollection({
         metrics: z.array(metric).max(4).default([]),
         cover: image().optional(),
         coverAlt: z.string().optional(),
-        disclosure: z.enum(['mock-data']).optional(), // renders the mock-data notice on the page
+        disclosure: z.enum(['mock-data', 'concept']).optional(), // renders its notice on the page
         draft: z.boolean().default(false),
       })
       .refine((d) => !d.cover || !!d.coverAlt, { message: 'coverAlt is required when cover is set' }),

@@ -1,0 +1,114 @@
+---
+title: 'Overpacked'
+summary: 'A concept for a group travel app. I wrote the vision and prototyped the scan, then ran research that told me to lead with something else.'
+tldr: 'Overpacked started as a social travel app: a lifetime map built from your camera roll, plus a record of who you travelled with. I prototyped the scan in SwiftUI, then ran a full research pass before writing more code. It found five of my six features already shipped by someone else and my growth plan broken by iOS 18. The one unclaimed idea was a photo book made from the whole group''s photos, so I rebuilt the concept around it and wrote kill criteria instead of a build plan.'
+order: 5
+org: 'Side project · concept'
+role: 'Solo: concept, research and prototype'
+period:
+  start: 2026-07-01 # TODO(mattias): when did you start? VISION.md was last updated 22 Jul 2026
+  end: 2026-09-06
+stack: ['SwiftUI', 'PhotoKit', 'CoreLocation', 'MapKit']
+metrics:
+  - label: 'Idea score, out of 10'
+    before: '4.6'
+    after: '5.3'
+    note: 'As first written, then reframed around the book'
+  - label: 'Features already shipped by others'
+    after: '5 of 6'
+  - label: 'Validation budget, no code'
+    after: '€330–730'
+cover: ../../assets/work/overpacked/cover.png
+coverAlt: 'Three iPhone mockups: a map of Europe with trip dots, a photo book spread with an Order the book button, and a web page asking a friend to add their photos.'
+disclosure: concept
+draft: true
+---
+
+import pairScanMap from '@/assets/work/overpacked/pair-1-scan-map.png';
+import pairTripPassenger from '@/assets/work/overpacked/pair-2-trip-passenger.png';
+import pairBookPeople from '@/assets/work/overpacked/pair-3-book-people.png';
+
+## Problem
+
+After a group trip the photos sit on six phones. Someone says they'll make an album, and nobody does. The money gets split in one app, the plan lives in another, and the group chat buries both within a week.
+
+I wanted one app that kept the whole trip. It would also keep something no other app keeps, which is who you were with. Your map would show places, and next to them the people. You and Maria, four trips, last in Lisbon.
+
+## Constraints
+
+- Solo and part-time, with an MSc at LSE starting in September 2026. A plan that needs six months of evenings isn't a plan.
+- €200–1,000 to find out whether the idea deserves that time.
+- Location and the photo library are the product. If the permission screens feel wrong, nobody gets past onboarding.
+- People travel about twice a year. Retention can't depend on daily opens.
+
+## Approach
+
+The first version, written in July 2026, had four layers: a lifetime map and passport, a live mode for the group during the trip, a memory layer ending in a printed book, and affiliate offers on top.
+
+The first thing anyone would see was the scan. Before signup, the app reads the location tags already in your photos and draws every trip you've taken. I built that part in SwiftUI. It picks home as the 11 km grid cell you photographed on the most separate days, counts anything over 100 km away as travel, merges away-days with gaps of up to three days into one trip, and drops day trips with fewer than five photos or under two hours. There's no backend.
+
+Each trip then becomes a group object. The organiser drops a link in the group chat, and everyone else adds photos from the browser with no account and no install. Splitwise makes every member install before they can join, and that's the step where groups fall apart.
+
+<Figure
+  src={pairScanMap}
+  alt="Two iPhone screens. Left: a glass sheet over a blurred camera roll reading 'See everywhere you've been' with a Choose photos button. Right: a map of Europe with orange trip dots, a home marker on Tallinn and a card showing 19 countries, 47 trips and 212 places."
+  caption="The scan runs before signup, so the app gives something before it asks for anything."
+  mock
+/>
+
+<Figure
+  src={pairTripPassenger}
+  alt="Two iPhone screens. Left: a Lisbon trip with six avatars, '1,412 photos between you' and a Make the book button. Right: a web page in Safari reading 'Kaspar made a book of Lisbon', with 4 of 6 people added and an Add your photos button."
+  caption="Friends add their photos from a link. They never install anything."
+  mock
+/>
+
+Before writing more Swift, I ran a full validation pass: market sizing, 15 competitor profiles, regulation, unit economics and a scorecard, with a source on every claim.
+
+## Decisions
+
+<Decision title="Make the book the product" options={["Map and co-travel graph first, book as an upsell", "Group book first, map as the reason to come back"]} chose="Group book first, map as the reason to come back">
+The research found one feature with no shipped competitor anywhere: a book built from every group member's photos, laid out automatically. Polarsteps sells books, but each one holds a single person's photos. That's their data model, not a missing feature. Books are also the one proven way to make money in this category, and Apple takes no commission on physical goods. The map stays in the app. It just stopped being the pitch.
+</Decision>
+
+<Figure
+  src={pairBookPeople}
+  alt="Two iPhone screens. Left: an open photo book reading '847 photos, down to 94', priced at €55 with a choice between paying for it or splitting it six ways. Right: a People screen with a map card for 'You and Maria, 4 trips', a list of friends and a dashed 'Traveller 2' entry."
+  caption="One person pays, or the group splits it. The people view waits until someone other than me asks for it."
+  mock
+/>
+
+<Decision title="No invite gate" options={["Unlock the app by inviting friends, like BeReal and Lapse", "Shared links and a home-screen widget, like Locket"]} chose="Shared links and a home-screen widget, like Locket">
+My growth plan copied BeReal's gate, where you invite friends to unlock the app. Apple changed contact permissions in iOS 18, and most apps that relied on the gate have since died or dropped it. Locket reached 9M+ daily users with no gate at all. I'd rather give up the viral trick than build on a mechanic Apple has already closed.
+</Decision>
+
+<Decision title="Experiments before code" options={["Build v1.0: 6–8 months part-time", "Four experiments: €330–730, no code"]} chose="Four experiments: €330–730, no code">
+An install costs €2–5 to buy in Western Europe, and first-year revenue per user would likely be under €5. The business only works if growth is close to free, and I found no solo founder who had pulled that off. So the next step is a fake-door page at three prices, 15 interviews, the scan on 10 strangers' phones and three print quotes.
+</Decision>
+
+## When it broke
+
+The research took my own vision document apart.
+
+Five of my six distinctive features had already shipped. Lense has the trip camera whose photos develop after the trip, with 100,000+ users. Retro raised $21M on camera-roll nostalgia. Pin Traveler has the map with friends. SplitSnap splits receipts item by item. Passage shipped photo-to-map in April 2026 and has three ratings, which says something about the scan too.
+
+I had described Polarsteps as a solo travel diary. It already lets six people co-own a trip, and it's profitable at 20–22M users.
+
+The part I cared about most, a record of who you travelled with, came up in no review, forum post or survey across eight research agents. That doesn't prove nobody wants it. It means I was the only evidence.
+
+|  | First version | After research |
+|---|---|---|
+| Lead feature | Lifetime map and who you travelled with | A book made from the whole group's photos |
+| The map | Front door | Reason to come back between trips |
+| The camera | What makes it different | Where the book's photos come from |
+| Growth | Invite gate, like BeReal | Links and a widget, like Locket |
+
+Two design changes came out of the privacy review. Friends who aren't on the app show up only in your private view, as "Traveller 2", and disappear if nobody names them. A named profile of a non-user would oblige me to notify them under GDPR Article 14. Face grouping is out entirely. And the scan asks through the photo picker instead of requesting the whole library.
+
+## Next
+
+I wrote the kill criteria before running anything, so I can't argue with them later. The book is dead if the landing page converts under 5% and fewer than 2 of 10 real groups pay. The people feature goes if 3 or fewer of 15 interviewees mention who they travelled with before I do. The scan stops being onboarding if fewer than 6 of 10 people recognise three of their own trips. If no experiment is done by 6 December 2026, I shelve it on purpose instead of letting it drift.
+
+{/* TODO(mattias): what happened after 6 Sep. Which experiments ran and what they showed, or that you shelved it. This line decides how the story ends. */}
+
+What I'd change: talk to 15 people before writing the vision document, not after building the prototype.

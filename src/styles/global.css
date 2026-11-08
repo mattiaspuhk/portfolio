@@ -3,6 +3,7 @@
 @import './prose.css';
 @import './apron.css';
 @import './terminal.css';
+@import './gates.css';
 @import './dock.css';
 @import './print.css';
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
@@ -16,6 +17,11 @@
   /* Full-bleed pieces like the radar band never cause a sideways scroll */
   body {
     overflow-x: clip;
+  }
+
+  ::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-ink);
   }
 
   :focus-visible {
@@ -48,6 +54,49 @@
   animation-duration: var(--dur-base);
 }
 
+/* The page body moves on its own, so the name and the dock hold still while it changes: the old
+   page lifts away quickly, then the new one settles up into place. TerminalDive.astro takes over
+   when you arrive at a case study. */
+#main {
+  view-transition-name: page;
+}
+
+::view-transition-old(page) {
+  animation: page-out 160ms ease-in both;
+}
+
+::view-transition-new(page) {
+  animation: page-in 420ms 100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page),
+  ::view-transition-new(page) {
+    animation: none;
+  }
+}
+
+/* In-page links (See my work, the beat nav) glide instead of jumping */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -56,5 +105,36 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Fine print: a muted small line under an image or header, with an optional mock-data label.
+ * The label sits on the text's centre line, so it reads as a tag, not a button.
+ */
+@layer components {
+  .fineprint {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--color-muted);
+  }
+
+  .mock-label {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    height: 1.25rem;
+    padding: 0 var(--space-xs);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--color-text);
+    white-space: nowrap;
   }
 }

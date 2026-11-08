@@ -1,0 +1,93 @@
+---
+// Selected work, on the home page, as a timeline of gate displays hanging from one ceiling rail,
+// newest on the left. The rail runs edge to edge and scrolls sideways (snap, no JS); each monitor
+// hangs on two thin mounts, with its start month on the rail as a yellow sign. A screen has a
+// header (title and kind) over the project's thumb (or its cover), dim until it's pointed at or focused. A project
+// with no cover shows its aircraft from above. The summary hangs under each screen. CSS only
+// (gates.css): the title link covers the whole monitor. --i staggers the monitors coming on as the
+// rail scrolls in; --vt is the cover's view-transition name, so the screenshot opens into the
+// case-study header.
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Arrow from '@/components/site/Arrow.astro';
+import { site } from '@/config/site';
+import { drawAircraftFrom } from '@/lib/apron/planes';
+import { formatMonthYear, isoDate, standNumber } from '@/lib/format';
+
+interface Props {
+  entries: CollectionEntry<'work'>[];
+  /** Heading level of the titles, to fit the page outline. */
+  headingLevel?: 2 | 3;
+  /** Accessible name of the scrolling rail. */
+  label?: string;
+}
+
+const { entries, headingLevel = 3, label = site.labels.home.work } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+const pad = 6;
+
+const monitors = [...entries]
+  .sort((a, b) => b.data.period.start.valueOf() - a.data.period.start.valueOf())
+  .map((entry) => {
+    const { data } = entry;
+    const plane = data.cover ? undefined : drawAircraftFrom(data.aircraft, -90, 89.9);
+    const b = plane?.bounds;
+    return {
+      entry,
+      start: data.period.start,
+      kind: data.kind && site.labels.kind[data.kind],
+      plane: plane &&
+        b && {
+          body: plane.body,
+          viewBox: [b.minX - pad, b.minY - pad, b.maxX - b.minX + 2 * pad, b.maxY - b.minY + 2 * pad].map(Math.round).join(' '),
+        },
+    };
+  });
+---
+
+<div class="gates-scroll" tabindex="0" role="region" aria-label={label}>
+  <ol class="gates">
+    {
+      monitors.map(({ entry, start, kind, plane }, index) => (
+        <li
+          class="gate-display"
+          style={`--i: ${index}` + (entry.data.cover ? `; --vt: stand-${standNumber(entry.data.order)}` : '')}
+        >
+          <time class="gate-date" datetime={isoDate(start)}>
+            {formatMonthYear(start)}
+          </time>
+          <div class="screen">
+            <div class="screen-bar">
+              <Heading class="screen-title">
+                <a href={`/work/${entry.id}`} aria-describedby={`gate-line-${entry.id}`}>
+                  {entry.data.title}
+                </a>
+              </Heading>
+              {kind && <span class="screen-meta">{kind}</span>}
+            </div>
+            <div class="screen-view">
+              {entry.data.thumb || entry.data.cover ? (
+                <Image
+                  src={(entry.data.thumb ?? entry.data.cover)!}
+                  alt={(entry.data.thumb ? entry.data.thumbAlt : entry.data.coverAlt) ?? ''}
+                  widths={[480, 720, 960]}
+                  sizes="(min-width: 48rem) 24rem, 80vw"
+                />
+              ) : (
+                plane && (
+                  <svg class="screen-plane" viewBox={plane.viewBox} aria-hidden="true">
+                    <g set:html={plane.body} />
+                  </svg>
+                )
+              )}
+            </div>
+          </div>
+          <p class="gate-line" id={`gate-line-${entry.id}`}>
+            {entry.data.summary}
+            <Arrow direction="up-right" class="gate-arrow" />
+          </p>
+        </li>
+      ))
+    }
+  </ol>
+</div>

@@ -12,3 +12,10 @@ _private/
 # Local working files: Claude drafts, CVs, screenshots, and per-machine Claude Code config
 /Claude outputs/
 .claude/
+
+# Local issue tracker (see docs/agents/issue-tracker.md)
+.scratch/
+
+# Project docs stay local: product and design records, agent guides, Impeccable's data
+/docs/
+/.impeccable/

@@ -41,7 +41,7 @@ const { levels, grid } = fieldPaths(field);
   if (band && canvas && ctx && hero) {
     const FLOW = 1.5; // cells a second the storm drifts along its line
     const SETTLE = 160; // ms time constant of a cell moving to its new level
-    const SPILL = 10; // cells the storm runs on past the hero's foot, thinning out as it goes
+    const SPILL = 16; // cells the storm runs on past the hero's foot, thinning out around the Selected work head
     const CLEARING = { clear: 12, fray: 32, soft: 64 }; // CSS px the storm keeps off the words
     const RADIUS = 76; // CSS px around the pointer that warms
     const WARM = 2.6; // ramp steps a cell climbs at the pointer

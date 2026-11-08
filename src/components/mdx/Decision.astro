@@ -1,4 +1,6 @@
 ---
+// A spec table: the options left behind, then the one chosen. The chosen option isn't
+// repeated under "Ruled out", so each option shows once.
 import { site } from '@/config/site';
 
 interface Props {
@@ -9,27 +11,34 @@ interface Props {
 
 const { title, options, chose } = Astro.props;
 const { decision: labels } = site.labels;
+const rejected = options.filter((option) => option !== chose);
 ---
 
 <div class="decision">
   <h3>{title}</h3>
   <dl>
     {
-      options.length > 0 && (
-        <>
-          <dt class="text-sm text-muted">{labels.options}</dt>
-          <dd>
-            <ul>
-              {options.map((option) => (
-                <li>{option}</li>
-              ))}
-            </ul>
+      rejected.length > 0 && (
+        <div>
+          <dt>{labels.options}</dt>
+          <dd class="decision-rejected">
+            {rejected.length === 1 ? (
+              rejected[0]
+            ) : (
+              <ul>
+                {rejected.map((option) => (
+                  <li>{option}</li>
+                ))}
+              </ul>
+            )}
           </dd>
-        </>
+        </div>
       )
     }
-    <dt class="text-sm text-muted">{labels.chose}</dt>
-    <dd>{chose}</dd>
+    <div>
+      <dt>{labels.chose}</dt>
+      <dd class="decision-chosen">{chose}</dd>
+    </div>
   </dl>
   <slot />
 </div>

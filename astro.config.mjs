@@ -6,8 +6,10 @@ import tailwindcss from '@tailwindcss/vite';
 import { remarkReadingTime } from './src/lib/remark-reading-time.mjs';
 
 export default defineConfig({
-  site: 'https://example.com', // TODO(mattias): final domain (sitemap, RSS and canonical URLs depend on it)
+  site: 'https://mattiaspuhk.com',
   integrations: [mdx(), sitemap()],
+  // The work list and Now live on the home page; old links land on their sections.
+  redirects: { '/work': '/#home-work', '/now': '/#home-now' },
   markdown: {
     // Astro 7's default processor (Sätteri) doesn't run remark plugins; MDX inherits this one.
     processor: unified({ remarkPlugins: [remarkReadingTime] }),

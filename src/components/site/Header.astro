@@ -4,6 +4,7 @@
 // header's markup so they come right after the name in tab order and print.css still hides them
 // with the header.
 import { site } from '@/config/site';
+import { getPublished } from '@/lib/content';
 import Nav from './Nav.astro';
 import ThemeToggle from './ThemeToggle.astro';
 
@@ -12,12 +13,19 @@ interface Props {
 }
 
 const { currentPath } = Astro.props;
+
+// A link to an empty index page is a dead end, so items tied to a collection wait for a first entry.
+const nav = [];
+for (const item of site.nav) {
+  if ('collection' in item && (await getPublished(item.collection)).length === 0) continue;
+  nav.push(item);
+}
 ---
 
 <header class="site-header mx-auto w-full max-w-(--page-width) px-(--gutter) py-(--space-md)">
   {currentPath !== '/' && <a href="/">{site.name}</a>}
   <div class="dock">
-    <Nav items={site.nav} label={site.labels.mainNav} currentPath={currentPath} />
+    <Nav items={nav} label={site.labels.mainNav} currentPath={currentPath} />
     <ThemeToggle label={site.labels.themeToggle} class="dock-glass dock-toggle">
       <svg
         class="dock-icon dock-icon-moon"

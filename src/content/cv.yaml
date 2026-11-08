@@ -1,4 +1,4 @@
-# CV entries for /cv, from the October 2026 CV. Copy an entry to add more.
+# CV entries for /cv, from the November 2026 CV. Copy an entry to add more.
 # `start` and `end` are "YYYY-MM"; leave `end` out for "present". `order` sorts within a section.
 
 - id: experience-ringit
@@ -40,7 +40,7 @@
     - "Made the restaurant's social media content, which raised engagement by 20%"
     - 'Ran seating for 80+ covers a day'
     - 'Helped with bookkeeping and stock counts for financial reporting'
-    - 'Trained 3 new waiting and bar staff on service and the till system'
+    - 'Trained new waiting and bar staff on service and the till system'
   order: 3
 
 - id: education-lse
@@ -57,19 +57,19 @@
 - id: education-taltech
   section: education
   title: 'BSc Business Information Technology'
-  org: 'Tallinn University of Technology'
+  org: 'Tallinn University of Technology (TalTech)'
   location: 'Tallinn, Estonia'
   start: '2023-09'
   end: '2026-06'
   bullets:
-    - 'GPA 4.30/5.0; thesis graded 5/5'
-    - "Thesis: Compared retrieval-augmented generation (RAG) approaches for a B2B SaaS platform using a custom evaluation harness; the findings informed the platform's AI rebuild"
+    - 'GPA 4.30/5.0'
+    - "Thesis (graded 5/5): Compared retrieval-augmented generation (RAG) approaches for a B2B SaaS platform using a custom evaluation harness; the findings informed the platform's AI rebuild"
   order: 2
 
 - id: education-tum
   section: education
   title: 'Exchange semester (Erasmus)'
-  org: 'Technical University of Munich'
+  org: 'Technical University of Munich (TUM)'
   location: 'Munich, Germany'
   start: '2025-10'
   end: '2026-03'
@@ -92,3 +92,34 @@
   bullets:
     - 'Estonian (Native), English (C2), Italian (Conversational), French (Conversational), Russian (Conversational)'
   order: 2
+
+- id: activities-transit
+  section: activities
+  title: 'Tallinn Public Transport App (open source, in progress)'
+  bullets:
+    - 'Building an open-source community app for Tallinn riders with a senior engineer: live departures, ride stats'
+    - "Presented the concept to Tallinn's transport board; access to rider data is now in discussion"
+  order: 1
+
+- id: activities-lse-sprint
+  section: activities
+  title: 'LSE Sprint Week with Visa and AWS'
+  bullets:
+    - 'Tackled a Gen Z problem in the financial space: built a prototype to curb impulse purchases in 5 days'
+    - 'Led product, UX/UI and prototype engineering in a team of 5, using Soft Systems Methodology and Kiro'
+  order: 2
+
+- id: activities-start-munich
+  section: activities
+  title: 'START Munich Entrepreneurship Hackathon'
+  bullets:
+    - 'Built a team project in 48 hours: a platform that lets anyone become an angel investor in startups'
+    - 'Pitched the final presentation to VC partners'
+  order: 3
+
+- id: activities-aviation
+  section: activities
+  title: 'Aviation & Photography'
+  bullets:
+    - 'Aviation enthusiast specialising in technical photography of commercial aircraft'
+  order: 4

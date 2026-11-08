@@ -600,10 +600,9 @@ export interface Drawing {
   bounds: { minX: number; minY: number; maxX: number; maxY: number };
 }
 
-function draw(type: Aircraft): Drawing {
+function draw(type: Aircraft, cam = camera()): Drawing {
   const P = build(type);
   const { m } = P;
-  const cam = camera();
   // Every aircraft is scaled towards a common size, keeping a hint of the real difference.
   const k = (20 * 46) / P.size ** 0.78 / 46 ** 0.22;
   const project = (p: Vec): Screen => {
@@ -728,6 +727,17 @@ const drawings = new Map<Aircraft, Drawing>();
 export function drawAircraft(type: Aircraft) {
   if (!drawings.has(type)) drawings.set(type, draw(type));
   return drawings.get(type)!;
+}
+
+/**
+ * The same aircraft from another camera, in camera()'s degrees: straight down (elevation 89.9) for
+ * the plan view on a gate display. Cached like drawAircraft.
+ */
+const views = new Map<string, Drawing>();
+export function drawAircraftFrom(type: Aircraft, azimuth: number, elevation: number) {
+  const key = `${type}:${azimuth}:${elevation}`;
+  if (!views.has(key)) views.set(key, draw(type, camera(azimuth, elevation)));
+  return views.get(key)!;
 }
 
 /**

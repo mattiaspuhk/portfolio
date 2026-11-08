@@ -26,12 +26,18 @@ const work = defineCollection({
         metrics: z.array(metric).max(4).default([]),
         cover: image().optional(),
         coverAlt: z.string().optional(),
+        /** Home page monitor only: one UI moment filling the screen. Falls back to cover. */
+        thumb: image().optional(),
+        thumbAlt: z.string().optional(),
         disclosure: z.enum(['mock-data', 'concept']).optional(), // renders its notice on the page
         draft: z.boolean().default(false),
         // The plane parked on the project's stand, on the home page and the case-study header.
         aircraft: z.enum(AIRCRAFT).default('narrow'),
+        // What kind of work it was, shown on the home page's gate display. Labels in site.ts.
+        kind: z.enum(['production', 'sprint', 'hackathon', 'concept']).optional(),
       })
-      .refine((d) => !d.cover || !!d.coverAlt, { message: 'coverAlt is required when cover is set' }),
+      .refine((d) => !d.cover || !!d.coverAlt, { message: 'coverAlt is required when cover is set' })
+      .refine((d) => !d.thumb || !!d.thumbAlt, { message: 'thumbAlt is required when thumb is set' }),
 });
 
 const proof = defineCollection({
@@ -47,24 +53,12 @@ const proof = defineCollection({
   }),
 });
 
-const notes = defineCollection({
-  loader: glob({ base: './src/content/notes', pattern: '**/[^_]*.mdx' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    published: z.coerce.date(),
-    updated: z.coerce.date().optional(),
-    tags: z.array(z.string()).default([]),
-    draft: z.boolean().default(false),
-  }),
-});
-
 const pages = defineCollection({
   loader: glob({ base: './src/content/pages', pattern: '*.mdx' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    updated: z.coerce.date().optional(), // required for `now`, enforced in now.astro
+    updated: z.coerce.date().optional(), // required for `now`, enforced in pages/index.astro
   }),
 });
 
@@ -72,7 +66,7 @@ const cv = defineCollection({
   loader: file('src/content/cv.yaml'),
   schema: z.object({
     id: z.string(),
-    section: z.enum(['experience', 'education', 'skills']),
+    section: z.enum(['experience', 'education', 'skills', 'activities']),
     title: z.string(),
     org: z.string().optional(),
     location: z.string().optional(),
@@ -83,4 +77,4 @@ const cv = defineCollection({
   }),
 });
 
-export const collections = { work, proof, notes, pages, cv };
+export const collections = { work, proof, pages, cv };

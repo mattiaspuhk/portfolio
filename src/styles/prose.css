@@ -77,10 +77,58 @@
     height: auto;
   }
 
+  /* Screenshots get more room than paragraphs, so the caption reads as part of the image */
+  .prose > figure,
+  .prose > figure + * {
+    margin-block-start: var(--space-lg);
+  }
+
   .prose figcaption {
+    margin-block-start: var(--space-sm);
+  }
+
+  /* Decision: a title, a spec table of options, then the reasoning */
+  .prose > .decision {
+    margin-block-start: var(--space-xl);
+  }
+
+  .prose .decision h3 {
+    margin-block-start: 0;
+  }
+
+  .prose .decision > * + * {
+    margin-block-start: var(--space-md);
+  }
+
+  .prose .decision dl {
     font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  .prose .decision dl > div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: var(--space-md);
+    padding-block: var(--space-xs);
+    border-block-start: var(--border-width) solid var(--color-border);
+  }
+
+  .prose .decision dt {
     color: var(--color-muted);
-    margin-block-start: var(--space-xs);
+  }
+
+  .prose .decision-rejected {
+    color: var(--color-muted);
+  }
+
+  .prose .decision-chosen {
+    font-weight: 500;
+  }
+
+  .prose .decision-rejected ul {
+    list-style: none;
+    padding-inline-start: 0;
   }
 
   .prose table {
@@ -123,5 +171,34 @@
     font-style: var(--shiki-dark-font-style) !important;
     font-weight: var(--shiki-dark-font-weight) !important;
     text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+}
+
+/*
+ * A beat heading reached from the beat nav: an ink line runs under it and on out, like a lead-in
+ * line on the apron, so the eye lands on the right heading after the glide.
+ */
+@layer components {
+  @media (prefers-reduced-motion: no-preference) {
+    .prose h2:target {
+      background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1.5px;
+      animation: beat-lead-in 1.1s 300ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    }
+
+    @keyframes beat-lead-in {
+      0% {
+        background-position: 0 100%;
+        background-size: 0 1.5px;
+      }
+      45%,
+      65% {
+        background-position: 0 100%;
+        background-size: 100% 1.5px;
+      }
+      100% {
+        background-position: 100% 100%;
+        background-size: 0 1.5px;
+      }
+    }
   }
 }

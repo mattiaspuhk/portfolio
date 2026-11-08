@@ -2,4 +2,4 @@ dist/
 .astro/
 _private/
 package-lock.json
-SPEC.md
+docs/

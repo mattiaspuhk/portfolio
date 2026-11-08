@@ -183,6 +183,62 @@
     font-size: var(--text-headline);
     line-height: var(--text-headline--line-height);
     letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  /* A head that opens its index page: a small arrow rides up by the last word, muted until the
+     head is pointed at or focused */
+  .apron-head a {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.12em;
+    transition: text-decoration-color var(--dur-slow) var(--ease);
+  }
+
+  .head-arrow {
+    display: inline-block;
+    width: 0.42em;
+    height: 0.42em;
+    margin-left: 0.04em;
+    vertical-align: 0.5em;
+    color: var(--color-muted);
+    transition:
+      color var(--dur-slow) var(--ease),
+      translate var(--dur-slow) var(--ease);
+  }
+
+  .apron-head a:is(:hover, :focus-visible) {
+    text-decoration-color: currentColor;
+    transition-duration: var(--dur-base);
+  }
+
+  .apron-head a:is(:hover, :focus-visible) .head-arrow {
+    color: var(--color-text);
+    translate: 0.06em -0.06em;
+    transition-duration: var(--dur-base);
+  }
+
+  /* Selected work follows the hero without a rule: the storm thins down onto its head, and the gate
+     rail just under it does the rule's job. It sits closer to the hero than the other sections sit
+     to each other, so the two read as one move. */
+  .home-work {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-top: calc(var(--space-2xl) * -0.5);
+  }
+
+  .apron-head.on-rail {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .apron-head a,
+    .head-arrow {
+      transition: none;
+    }
   }
 
   /* Label in the first column, content in the rest, like a spec sheet */
@@ -474,23 +530,19 @@
     transition-duration: var(--dur-base);
   }
 
-  /* ---------- Case-study header: the stand the reader came from, lit, beside its spec ---------- */
+  /* ---------- Case-study header: title block, results, then the cover ---------- */
 
   .case-head {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-lg);
-    align-items: end;
   }
 
-  .case-spec {
+  .case-intro {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-md);
-  }
-
-  .case-spec .spec-table {
-    align-self: stretch;
   }
 
   .case-title {
@@ -502,20 +554,215 @@
     text-wrap: balance;
   }
 
+  /* Tag words: the kind of work, and the facts under the summary */
+  .case-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: 999px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .case-pill-fill {
+    border-color: transparent;
+    background: var(--color-surface);
+  }
+
+  .case-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+  }
+
+  .case-tags > div {
+    display: contents;
+  }
+
+  .case-tags > .case-stack {
+    display: block;
+    flex-basis: 100%;
+  }
+
+  .case-stack ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .case-summary {
+    max-width: 52ch;
+    font-size: var(--text-lg);
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+
+  /* The results, as the figures the reader came for. Hairlines between them, like the
+     spec table they used to live in. */
+  .case-metrics {
+    display: grid;
+    border-top: 1.5px solid var(--color-text);
+  }
+
+  /* Figure first, then its label and note. The dt stays first in the markup for screen readers. */
+  .case-metric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-block: var(--space-sm) var(--space-md);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  .case-metric > dt {
+    order: 2;
+    max-width: 24ch;
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .case-metric > dd {
+    display: contents;
+  }
+
+  .case-metric > dd > :first-child {
+    order: 1;
+    margin-bottom: var(--space-xs);
+  }
+
+  .case-metric strong {
+    font-family: var(--font-display);
+    font-size: var(--text-headline);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .case-metric .metric-before {
+    font-size: var(--text-xl);
+    color: var(--color-muted);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  .case-metric svg {
+    color: var(--color-muted);
+  }
+
+  .case-metric-note {
+    order: 3;
+    max-width: 32ch;
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+  }
+
+  .case-cover {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  /* The covers share one canvas with a transparent margin round the phones. Trim the band
+     every cover leaves empty, top and bottom, so the phones sit closer to the figures. */
+  .case-cover img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2838 / 1740;
+    object-fit: cover;
+  }
+
+  .case-tldr {
+    margin-top: var(--space-xl);
+  }
+
   @media (min-width: 48rem) {
     .case-head {
       grid-template-columns: repeat(12, minmax(0, 1fr));
       column-gap: var(--space-md);
+      row-gap: var(--space-xl);
     }
 
-    .case-spec {
-      grid-column: 1 / span 5;
-      grid-row: 1;
+    .case-intro {
+      grid-column: 1 / span 8;
     }
 
-    .case-figure {
-      grid-column: 6 / span 7;
-      grid-row: 1;
+    .case-metrics {
+      grid-column: 1 / -1;
+      grid-template-columns: repeat(var(--metric-cols), minmax(0, 1fr));
+    }
+
+    .case-metric {
+      padding: var(--space-md);
+      border-bottom: 0;
+    }
+
+    .case-metric:first-child {
+      padding-left: 0;
+    }
+
+    .case-metric + .case-metric {
+      border-left: var(--border-width) solid var(--color-border);
+    }
+
+    .case-cover,
+    .case-tldr {
+      grid-column: 1 / -1;
+    }
+
+    .case-tldr {
+      margin-top: var(--space-lg);
+    }
+  }
+}
+
+/*
+ * Hero motion. "See my work" glides down (smooth scrolling is set in global.css) and its arrow
+ * nudges the way it goes. As the hero scrolls away, the words dissolve into the storm: opacity and
+ * blur only, never a move, because the radar measures the words' boxes to keep clear air round them.
+ */
+@layer components {
+  .hero-link svg {
+    transition: translate var(--dur-slow) var(--ease);
+  }
+
+  .hero-link:is(:hover, :focus-visible) svg {
+    translate: 0 2px;
+    transition-duration: var(--dur-base);
+  }
+
+  .hero-link:active svg {
+    translate: 0 4px;
+    transition-duration: var(--dur-fast);
+  }
+
+  /* Lands with the head a little below the top of the window */
+  #home-work {
+    scroll-margin-block-start: var(--space-lg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .hero {
+        view-timeline: --hero block;
+      }
+
+      .hero > :is(.headline, .hero-intro, .hero-link) {
+        animation: hero-dissolve linear both;
+        animation-timeline: --hero;
+        animation-range: exit 25% exit 70%;
+      }
+
+      @keyframes hero-dissolve {
+        to {
+          opacity: 0.08;
+          filter: blur(6px);
+        }
+      }
     }
   }
 }

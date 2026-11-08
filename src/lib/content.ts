@@ -15,9 +15,6 @@ export async function getPublished<C extends CollectionKey>(name: C): Promise<Co
 export const byOrder = (a: { data: { order: number } }, b: { data: { order: number } }) =>
   a.data.order - b.data.order;
 
-export const byPublishedDesc = (a: CollectionEntry<'notes'>, b: CollectionEntry<'notes'>) =>
-  b.data.published.valueOf() - a.data.published.valueOf();
-
 /** Previous and next published case studies by `order`. */
 export async function getAdjacentWork(id: string) {
   const work = (await getPublished('work')).sort(byOrder);

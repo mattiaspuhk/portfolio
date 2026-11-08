@@ -7,7 +7,7 @@ import { formatRange, formatYearMonth } from '@/lib/format';
 
 const entries = (await getCollection('cv')).sort(byOrder);
 const { cv: labels } = site.labels;
-const sections = (['experience', 'education', 'skills'] as const)
+const sections = (['experience', 'education', 'skills', 'activities'] as const)
   .map((key) => ({
     key,
     label: labels[key],

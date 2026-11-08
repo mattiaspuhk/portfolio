@@ -2,21 +2,21 @@
 import { getEntry, render } from 'astro:content';
 import RadarBand from '@/components/apron/RadarBand.astro';
 import Arrow from '@/components/site/Arrow.astro';
-import Terminal from '@/components/apron/Terminal.astro';
+import GateDisplays from '@/components/apron/GateDisplays.astro';
 import { mdxComponents } from '@/components/mdx';
-import NoteItem from '@/components/notes/NoteItem.astro';
-import ProofPoints from '@/components/work/ProofPoints.astro';
 import { site } from '@/config/site';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { byOrder, byPublishedDesc, getPublished } from '@/lib/content';
+import { byOrder, getPublished } from '@/lib/content';
 import { formatDate, isoDate } from '@/lib/format';
 
 const work = (await getPublished('work')).sort(byOrder);
-const proof = (await getPublished('proof')).sort(byOrder);
-const notes = (await getPublished('notes')).sort(byPublishedDesc).slice(0, 3);
 const now = await getEntry('pages', 'now');
+if (now && !now.data.updated) {
+  throw new Error('[now] src/content/pages/now.mdx needs an `updated` date in its frontmatter.');
+}
 const NowContent = now && (await render(now)).Content;
 const { home: labels } = site.labels;
+// Selected work and Now live only here; the dock's Work and Now items jump to their sections.
 
 // The headline's last words take a line of their own and glow. If they aren't in the headline,
 // nothing does.
@@ -45,22 +45,11 @@ const role = roleAt >= 0 ? labels.introTitleRole : '';
 
     {
       work.length > 0 && (
-        <section class="flex flex-col gap-(--space-xl)" aria-labelledby="home-work">
-          <h2 id="home-work" class="apron-head">
-            <a href="/work">{labels.work}</a>
+        <section class="home-work" aria-labelledby="home-work">
+          <h2 id="home-work" class="apron-head on-rail" data-radar-clear>
+            {labels.work}
           </h2>
-          <Terminal entries={work} headingLevel={3} />
-        </section>
-      )
-    }
-
-    {
-      proof.length > 0 && (
-        <section class="flex flex-col gap-(--space-xl)" aria-labelledby="home-proof">
-          <h2 id="home-proof" class="apron-head">
-            {labels.proof}
-          </h2>
-          <ProofPoints items={proof} />
+          <GateDisplays entries={work} headingLevel={3} />
         </section>
       )
     }
@@ -69,7 +58,7 @@ const role = roleAt >= 0 ? labels.introTitleRole : '';
       now && NowContent && (
         <section class="flex flex-col gap-(--space-xl)" aria-labelledby="home-now">
           <h2 id="home-now" class="apron-head">
-            <a href="/now">{labels.now}</a>
+            {labels.now}
           </h2>
           <div class="apron-split">
             {now.data.updated && (
@@ -82,23 +71,6 @@ const role = roleAt >= 0 ? labels.introTitleRole : '';
               <NowContent components={mdxComponents} />
             </div>
           </div>
-        </section>
-      )
-    }
-
-    {
-      notes.length > 0 && (
-        <section class="flex flex-col gap-(--space-xl)" aria-labelledby="home-notes">
-          <h2 id="home-notes" class="apron-head">
-            <a href="/notes">{labels.notes}</a>
-          </h2>
-          <ul class="apron-rows">
-            {notes.map((entry) => (
-              <li>
-                <NoteItem entry={entry} headingLevel={3} />
-              </li>
-            ))}
-          </ul>
         </section>
       )
     }

@@ -34,8 +34,9 @@ export function formatYearMonth(value: string) {
   return formatMonthYear(new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1)));
 }
 
-/** `end` missing means the period is ongoing. */
+/** `end` missing means the period is ongoing. A range inside one month is just that month. */
 export function formatRange(start: string, end: string | undefined, present: string) {
+  if (end === start) return start;
   return `${start} – ${end ?? present}`;
 }
 

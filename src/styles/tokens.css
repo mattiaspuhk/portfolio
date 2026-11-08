@@ -135,6 +135,17 @@
   --apron-shadow: rgb(0 0 0 / 0.06);
   --apron-tag: #f5c518; /* stand tags, black on yellow like airport direction signs */
   --apron-tag-ink: #141210;
+  /*
+   * Gate display (gates.css): the home page's Selected work as airport screens. A screen stays dark
+   * in both themes, so it has its own ink. The bezel is the screen's ground, a step lighter.
+   */
+  --screen-ground: var(--apron-tag-ink);
+  --screen-bezel: color-mix(in oklab, var(--apron-tag-ink) 88%, white);
+  --screen-ink: #f3f1ea;
+  --screen-muted: #a39f95;
+  --screen-rule: rgb(255 255 255 / 0.1);
+  --screen-dim: brightness(0.78) saturate(0.7); /* a screenshot until its screen is lit */
+  --screen-shadow: 0 10px 24px -14px rgb(0 0 0 / 0.5);
   /* Halation on the headline's last words: dark ink with a soft bloom */
   --halo: #ff4a0a;
   --halo-ink: #5a1902;
@@ -147,6 +158,9 @@
   --radar-3: #f67621;
   --radar-4: #e35003;
   --radar-5: #aa2d00;
+  /* Selected text: the radar band's softest return, in the halo's ink */
+  --selection-bg: var(--radar-1);
+  --selection-ink: var(--halo-ink);
 
   /*
    * Dock (dock.css): the nav in a glass pill at the bottom of the window, the theme toggle in a
@@ -209,6 +223,7 @@
   --radar-3: #d55d05;
   --radar-4: #fb8e31;
   --radar-5: #fed29c;
+  --selection-bg: var(--radar-2);
   --dock-tint: color-mix(in oklab, var(--color-surface) 45%, transparent);
   --dock-tint-solid: color-mix(in oklab, var(--color-surface) 94%, transparent);
   --dock-rim: rgb(255 255 255 / 0.32);
@@ -256,6 +271,7 @@
     --radar-3: #d55d05;
     --radar-4: #fb8e31;
     --radar-5: #fed29c;
+    --selection-bg: var(--radar-2);
     --dock-tint: color-mix(in oklab, var(--color-surface) 45%, transparent);
     --dock-tint-solid: color-mix(in oklab, var(--color-surface) 94%, transparent);
     --dock-rim: rgb(255 255 255 / 0.32);

@@ -1,4 +1,4 @@
-# Platform proof points, shown on /. `hidden: true` keeps an entry out of production builds.
+# Platform proof points. Not shown anywhere for now (they left the home page). `hidden: true` keeps an entry out of production builds.
 # TODO(mattias): `year: 0` is a placeholder on every entry.
 
 - id: org-identity

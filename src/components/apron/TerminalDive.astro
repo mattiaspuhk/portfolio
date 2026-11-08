@@ -27,8 +27,8 @@ const ease = 'cubic-bezier(0.22,1,0.36,1)';
 const css =
   hit &&
   `::view-transition-old(apron){transform-origin:${at(hit.x + hit.w / 2)} ${at(hit.y + hit.h / 2)};animation:terminal-push 200ms ease-in both}` +
-    `::view-transition-old(root),::view-transition-old(*.peek),::view-transition-old(${stand}){animation:terminal-out 160ms ease-in both}` +
-    `::view-transition-new(root){animation:terminal-in 340ms 170ms ease-out both}` +
+    `::view-transition-old(root),::view-transition-old(page),::view-transition-old(*.peek),::view-transition-old(${stand}){animation:terminal-out 160ms ease-in both}` +
+    `::view-transition-new(root),::view-transition-new(page){animation:terminal-in 340ms 170ms ease-out both}` +
     `::view-transition-group(${stand}){animation-duration:680ms;animation-timing-function:${ease}}` +
     `::view-transition-new(${stand}){animation:terminal-in 160ms ease-out both}` +
     `::view-transition-new(${stand}-title):only-child{animation:terminal-rise 460ms 220ms ${ease} both}` +

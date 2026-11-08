@@ -18,13 +18,9 @@ const { src, alt, caption, mock = false } = Astro.props;
   <Image src={src} alt={alt} />
   {
     (caption || mock) && (
-      <figcaption>
-        {mock && (
-          <span class="me-(--space-xs) rounded-sm border border-border px-(--space-xs) text-xs">
-            {site.labels.mockData}
-          </span>
-        )}
-        {caption}
+      <figcaption class="fineprint">
+        {mock && <span class="mock-label">{site.labels.mockData}</span>}
+        {caption && <span>{caption}</span>}
       </figcaption>
     )
   }

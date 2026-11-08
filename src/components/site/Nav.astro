@@ -2,6 +2,8 @@
 interface Item {
   label: string;
   href: string;
+  /** Path the item counts as current under, if not its href. */
+  match?: string;
 }
 
 interface Props {
@@ -15,7 +17,7 @@ const { items, label, currentPath } = Astro.props;
 
 const trim = (path: string) => path.replace(/\/+$/, '') || '/';
 const current = trim(currentPath);
-const isCurrent = (href: string) => current === href || current.startsWith(`${href}/`);
+const isCurrent = ({ href, match = href }: Item) => current === match || current.startsWith(`${match}/`);
 ---
 
 {
@@ -24,8 +26,8 @@ const isCurrent = (href: string) => current === href || current.startsWith(`${hr
       <ul class="dock-list">
         {items.map((item) => (
           <li>
-            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined} class="dock-link">
-              {isCurrent(item.href) && <span class="dock-lens" aria-hidden="true" />}
+            <a href={item.href} aria-current={isCurrent(item) ? 'page' : undefined} class="dock-link">
+              {isCurrent(item) && <span class="dock-lens" aria-hidden="true" />}
               {item.label}
             </a>
           </li>

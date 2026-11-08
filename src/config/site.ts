@@ -11,14 +11,15 @@ export const site = {
   email: 'mattias.puhk@gmail.com',
 
   socials: [
-    { label: 'GitHub', href: '' }, // TODO(mattias)
+    { label: 'GitHub', href: 'https://github.com/mattiaspuhk' },
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/mattias-puhk' },
   ],
 
+  // `collection`: the item hides from the dock while that collection has nothing published.
+  // `match`: the path the item counts as current under, when `href` isn't a page of its own.
   nav: [
-    { label: 'Work', href: '/work' },
-    { label: 'Notes', href: '/notes' },
-    { label: 'Now', href: '/now' },
+    { label: 'Work', href: '/#home-work', match: '/work', collection: 'work' },
+    { label: 'Now', href: '/#home-now' },
     { label: 'About', href: '/about' },
     { label: 'CV', href: '/cv' },
   ],
@@ -46,33 +47,34 @@ export const site = {
       tldr: 'Short version',
     },
     metric: { before: 'Before', after: 'After' }, // screen-reader text around before → after
-    decision: { options: 'Considered', chose: 'Went with' },
+    // The `kind` of a case study, on its gate display.
+    kind: {
+      production: 'In production',
+      sprint: 'Sprint week',
+      hackathon: 'Hackathon',
+      concept: 'Concept',
+    },
+    decision: { options: 'Ruled out', chose: 'Went with' },
     home: {
       introTitle: 'Mattias Puhk, a product engineer.',
       introTitleRole: 'a product engineer.', // the end of introTitle, on its own line in the glowing ink
       intro: 'From Estonia 🇪🇪, now in London 🇬🇧 doing an MSc at LSE.',
-      seeWork: 'See the work', // the hero's link down to Selected work
-      work: 'Selected work',
+      seeWork: 'See my work', // the hero's link down to the work section
+      work: 'Work',
       proof: 'More from the GAIA rebuild',
       now: 'Now',
-      notes: 'Notes',
     },
     cv: {
       download: 'Download PDF',
       experience: 'Experience',
       education: 'Education',
       skills: 'Skills',
+      activities: 'Activities & Interests',
     },
   },
 
   /** Titles and meta descriptions for pages that aren't backed by an MDX file. */
   pages: {
-    work: {
-      title: 'Work',
-      description:
-        'Case studies of what Mattias Puhk built, with the decisions behind each one and what broke.',
-    },
-    notes: { title: 'Notes', description: 'Shorter pieces by Mattias Puhk on building software.' },
     cv: { title: 'CV', description: "Mattias Puhk's education, experience and skills." },
     notFound: {
       title: 'Page not found',

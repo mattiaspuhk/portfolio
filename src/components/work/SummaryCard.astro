@@ -1,9 +1,10 @@
 ---
-// The case-study header, laid out like an aircraft spec sheet: the title and spec table on the
-// left, the project's stand on the right with its light on. The stand and title share
-// view-transition names with the home page, so the plane the reader clicked moves in here.
+// The case-study header. The kind of work sits above the title, and the facts follow the summary
+// as tag words: context in hairline pills, the stack in filled ones. The results run below as large figures across
+// the full width, then the project's cover. The cover takes the stand's view-transition name, so
+// the plane the reader clicked on the home page opens into it.
 import type { CollectionEntry } from 'astro:content';
-import StandArt from '@/components/apron/StandArt.astro';
+import { Image } from 'astro:assets';
 import { site } from '@/config/site';
 import { formatPeriod, standNumber } from '@/lib/format';
 import MetricFigure from './MetricFigure.astro';
@@ -14,70 +15,117 @@ interface Props {
   title: Work['title'];
   summary: Work['summary'];
   order: Work['order'];
-  aircraft: Work['aircraft'];
   org: Work['org'];
   role: Work['role'];
   period: Work['period'];
   stack: Work['stack'];
   metrics: Work['metrics'];
+  cover?: Work['cover'];
+  coverAlt?: Work['coverAlt'];
+  disclosure?: Work['disclosure'];
   minutesRead: number;
   tldr?: Work['tldr'];
+  kind?: Work['kind'];
 }
 
-const { title, summary, order, aircraft, org, role, period, stack, metrics, minutesRead, tldr } = Astro.props;
+const { title, summary, order, org, role, period, stack, metrics, cover, coverAlt, disclosure, minutesRead, tldr, kind } =
+  Astro.props;
 const { summary: labels } = site.labels;
 const number = standNumber(order);
+// One or two results still take a third of the row each, so a lone figure doesn't stretch across it.
+const metricCols = Math.max(metrics.length, 3);
+// The disclosure is fine print under the cover, so it sits next to the images it's about.
+const notices = { 'mock-data': site.labels.mockDataNotice, concept: site.labels.concept };
+const notice = disclosure && notices[disclosure];
 ---
 
-<header class="flex flex-col gap-(--space-2xl)">
-  <div class="case-head">
-    <div class="case-spec">
-      <span class="stand-tag">{number}</span>
-      <h1 class="case-title" style={`view-transition-name: stand-${number}-title`}>{title}</h1>
-      <p class="stand-summary">{summary}</p>
-      <dl class="spec-table">
-        <dt>{labels.org}</dt>
-        <dd>{org}</dd>
-        <dt>{labels.role}</dt>
-        <dd>{role}</dd>
-        <dt>{labels.period}</dt>
-        <dd>{formatPeriod(period, site.labels.present)}</dd>
-        {
-          stack.length > 0 && (
-            <>
-              <dt>{labels.stack}</dt>
-              <dd>
-                <ul class="flex flex-wrap gap-x-(--space-sm)">
-                  {stack.map((item) => (
-                    <li>{item}</li>
-                  ))}
-                </ul>
-              </dd>
-            </>
-          )
-        }
-        <dt>{labels.readTime}</dt>
-        <dd>{site.labels.readTime(minutesRead)}</dd>
-        {
-          metrics.map((metric) => (
-            <>
-              <dt>{metric.label}</dt>
-              <dd>
-                <MetricFigure before={metric.before} after={metric.after} />
-                {metric.note && <span class="block text-muted">{metric.note}</span>}
-              </dd>
-            </>
-          ))
-        }
-      </dl>
-    </div>
-    <div class="case-figure stand-lit" style={`view-transition-name: stand-${number}`}>
-      <StandArt aircraft={aircraft} number={number} />
-    </div>
+<header class="case-head">
+  <div class="case-intro">
+    {kind && <p class="case-pill">{site.labels.kind[kind]}</p>}
+    <h1 class="case-title" style={`view-transition-name: stand-${number}-title`}>{title}</h1>
+    <p class="case-summary">{summary}</p>
+    <dl class="case-tags">
+      <div>
+        <dt class="sr-only">{labels.org}</dt>
+        <dd class="case-pill">{org}</dd>
+      </div>
+      <div>
+        <dt class="sr-only">{labels.role}</dt>
+        <dd class="case-pill">{role}</dd>
+      </div>
+      <div>
+        <dt class="sr-only">{labels.period}</dt>
+        <dd class="case-pill">{formatPeriod(period, site.labels.present)}</dd>
+      </div>
+      <div>
+        <dt class="sr-only">{labels.readTime}</dt>
+        <dd class="case-pill">{site.labels.readTime(minutesRead)}</dd>
+      </div>
+      {
+        stack.length > 0 && (
+          <div class="case-stack">
+            <dt class="sr-only">{labels.stack}</dt>
+            <dd>
+              <ul>
+                {stack.map((item) => (
+                  <li class="case-pill case-pill-fill">{item}</li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        )
+      }
+    </dl>
   </div>
+
+  {
+    metrics.length > 0 && (
+      <dl class="case-metrics" style={`--metric-cols: ${metricCols}`}>
+        {metrics.map((metric) => (
+          <div class="case-metric">
+            <dt>{metric.label}</dt>
+            <dd>
+              <MetricFigure before={metric.before} after={metric.after} />
+              {metric.note && <span class="case-metric-note">{metric.note}</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+
+  {
+    cover && (
+      <figure class="case-cover" style={`view-transition-name: stand-${number}`}>
+        <Image
+          src={cover}
+          alt={coverAlt ?? ''}
+          widths={[720, 1080, 1440, 2048]}
+          sizes="(min-width: 64rem) 64rem, 100vw"
+          loading="eager"
+          fetchpriority="high"
+        />
+        {notice && (
+          <figcaption role="note" class="fineprint">
+            {disclosure === 'mock-data' && <span class="mock-label">{site.labels.mockData}</span>}
+            <span>{notice}</span>
+          </figcaption>
+        )}
+      </figure>
+    )
+  }
+  {
+    !cover && notice && (
+      <p role="note" class="fineprint">
+        {disclosure === 'mock-data' && <span class="mock-label">{site.labels.mockData}</span>}
+        <span>{notice}</span>
+      </p>
+    )
+  }
+
   {
     tldr && (
-      <div class="apron-split border-t-[1.5px] border-text pt-(--space-sm)">
+      <div class="case-tldr apron-split border-t-[1.5px] border-text pt-(--space-sm)">
         <p class="text-sm text-muted">{labels.tldr}</p>
         <p class="max-w-[46ch] text-xl leading-normal">{tldr}</p>
       </div>

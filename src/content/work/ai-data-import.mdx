@@ -14,10 +14,15 @@ metrics:
     before: '80'
     after: '2'
   # TODO(mattias): add the usage number (imports run or rows imported) once you've pulled it
+cover: ../../assets/work/ai-data-import/cover.png
+coverAlt: 'Three close-ups of the GAIA import: a column mapping that matches headers like Acct Name and Tel / Mob to GAIA fields, a probable duplicate with Skip, Create anyway and Update existing buttons, and a contact flagged for an invalid email address.'
 disclosure: mock-data
 draft: true
 aircraft: wide
 ---
+
+import planMapping from '@/assets/work/ai-data-import/plan-mapping.png';
+import reviewDuplicates from '@/assets/work/ai-data-import/review-duplicates.png';
 
 ## Problem
 
@@ -25,8 +30,13 @@ GAIA is only useful once your partners and contacts are in it. New customers did
 
 The standard fix is a column-mapping wizard. It's the screen every CRM has, where you match "Acct Name" to "Company" one dropdown at a time. It's also the step people give up on, and it does nothing for a photo of four business cards.
 
-{/* TODO(mattias): Figure, mock. A messy export (odd headers, merged columns) next to the fields GAIA needs.
-    Caption idea: "What a real export looks like next to what GAIA expects." */}
+<Figure
+  src={planMapping}
+  alt="The Plan step of the GAIA import for mock-contacts.csv, about 7 contacts detected. A column mapping table matches headers from the file to GAIA fields: Acct Name to Company name, Contact (Primary) to Full name, Title/Role to Job title, Tel / Mob to Phone, E-mail to Email, Ctry to Country, HQ to City and Web to Company links. Owner and Notes are ignored. A note reads 'Nothing is imported until you press Start.'"
+  mock
+/>
+
+{/* TODO(mattias): caption. Your idea: "What a real export looks like next to what GAIA expects." */}
 
 ## Constraints
 
@@ -66,6 +76,14 @@ Sending rows to the model is simpler to build and copes better with odd rows. Bu
 <Decision title="Duplicates are flagged, never merged" options={["Let the model merge duplicates", "Rule-based matching, the user decides"]} chose="Rule-based matching, the user decides">
 Auto-merging would save clicks. A wrong merge quietly destroys a contact someone cared about. So matching is plain rules, the review screen shows each match, and the user picks.
 </Decision>
+
+<Figure
+  src={reviewDuplicates}
+  alt="The Review step of the GAIA import on the Duplicates tab, with 3 probable matches to decide. Each row puts the contact from the file next to the existing contact, such as Ingrid Solheim at brekkvik.example against the same name at Brekkvik Valves AS, with Skip, Create anyway and Update existing buttons. A warning reads '3 probable duplicates need a decision before you can import'."
+  mock
+/>
+
+{/* TODO(mattias): caption */}
 
 ## When it broke
 

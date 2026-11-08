@@ -23,6 +23,10 @@ draft: true
 aircraft: narrow
 ---
 
+import landing from '@/assets/work/intelligence-center/landing.png';
+import answerPipelineChart from '@/assets/work/intelligence-center/answer-pipeline-chart.png';
+import activityDraft from '@/assets/work/intelligence-center/activity-draft.png';
+
 ## Problem
 
 In July GAIA had seven weeks to put AI in front of customers at a trade fair. The plan had three parts. Insight cards on the dashboard would flag what needed attention, a briefing would send those cards out, and Intelligence would be where you asked why.
@@ -46,11 +50,27 @@ I wrote the brief, and in it I named answer quality as the biggest risk in the w
 
 You ask from the Intelligence page, from "Ask why" on an insight card, or from a panel on a record's page. The panel floats over the record, so you can still read it while you ask.
 
+<Figure
+  src={landing}
+  alt="The GAIA Intelligence page, marked AI and Beta, asking 'Which partners need attention right now?' Below an input reading 'Ask about your partner network…' is a Worth asking about list of three questions drawn from findings, such as the status of a fire-main valve replacement, with links to browse all 6 findings and to 3 recent chats."
+  mock
+/>
+
+{/* TODO(mattias): caption */}
+
 Before the model sees anything, the backend looks for a snapshot of the organisation's data. It's a DuckDB file that holds only the rows that organisation can access, and it's rebuilt when the organisation's records change. A rebuild takes a second or two, and the screen says so instead of looking stuck.
 
 The model gets one tool for structured data. It can run a single read-only SELECT against that file. It reads a catalogue of the tables with worked example queries, and CI runs every example. Business definitions like open pipeline and revenue are built into the snapshot from the same constants the insight cards use, so a figure in chat matches the figure on the card. Money goes in as exact decimals, never as floats.
 
 The answer streams in blocks. The headline finding comes first, then the causes, the records involved and two to four follow-up questions. The model can't state a fact about a record. It names record ids, and code reads the facts for the sources rail back out of the snapshot. Charts and tables work the same way. The model points at a query result it already has and picks the columns. It never types a number into a chart.
+
+<Figure
+  src={answerPipelineChart}
+  alt="A GAIA Intelligence answer to 'How is my pipeline developing?' The headline reads 'Your open pipeline totals $1,145,326 across 10 opportunities', followed by two paragraphs on stages and partners, a bar chart of open pipeline value by sales stage, and three follow-up questions. A sources rail on the right lists 13 opportunities with value and stage."
+  mock
+/>
+
+{/* TODO(mattias): caption */}
 
 Every conversation is traced in Langfuse. A thumbs-up or a flag in the app lands as a score on the exact generation that wrote the answer, along with the user's comment.
 
@@ -75,8 +95,13 @@ The first version took 27.3 seconds to answer, and you saw nothing until the end
 In September users asked to log activities by describing them. Creating the record when someone types "yes" would have been less work. But a "yes" in chat is weak permission for a write, and the details can drift between the offer and the call. So the model drafts a card. The click goes to a route that re-reads the stored draft, checks every id and the user's access again, and calls the same service as the normal form. Audit, notifications and the timeline entry happen once, in the usual place. The worst a prompt injection can do is put a visible card in front of someone.
 </Decision>
 
-{/* TODO(mattias): Figure, mock. A drafted activity card with Create activity and Discard.
-    Caption idea: "The model can draft. Only a click creates." */}
+<Figure
+  src={activityDraft}
+  alt="A suggested activity card drafted by GAIA Intelligence: a follow-up phone meeting with Anke Feldmann about a seawater pump quotation, planned for 10 Nov 2026 at 10:00, with notes. Below are Create activity and Discard buttons and the line 'Nothing is saved until you confirm it.'"
+  mock
+/>
+
+{/* TODO(mattias): caption. Your idea: "The model can draft. Only a click creates." */}
 
 ## When it broke
 

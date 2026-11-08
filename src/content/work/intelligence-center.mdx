@@ -1,6 +1,7 @@
 ---
 title: 'Intelligence Center'
 summary: "An AI analyst that answers questions about an organisation's own data. It reads through one read-only SQL tool, and only the user's click can create anything."
+tldr: "GAIA's new insight cards could tell an organisation that an opportunity was at risk, but not why. I built Intelligence, an AI analyst you ask about your own records. It reads through one SQL tool over a copy of your organisation's data, and only your click can create anything. I got the first words of an answer from 27.3 seconds to 12.9. When it invented two opportunities worth $480,000, I found three separate gaps that let the answer through, and only one of them was in what the model was told."
 order: 2
 org: 'RingIT · GAIA'
 role: 'Built it'
@@ -14,6 +15,9 @@ metrics:
     after: '12.9s'
   - label: 'Cost per answer'
     after: '12% lower'
+# Cover: real GAIA Intelligence answers on a fictional org's pipeline. Sources and compose script: Claude outputs/gaia-thumbnails/
+cover: ../../assets/work/intelligence-center/cover.png
+coverAlt: 'Three close-ups of GAIA Intelligence: a question about which partners bring the most open pipeline with its answer heading, a ranked bar list of three partners by pipeline value, and a suggested follow-up call with Create activity and Discard buttons.'
 disclosure: mock-data
 draft: true
 aircraft: narrow
@@ -21,24 +25,75 @@ aircraft: narrow
 
 ## Problem
 
-{/* TODO(mattias) */}
+In July GAIA had seven weeks to put AI in front of customers at a trade fair. The plan had three parts. Insight cards on the dashboard would flag what needed attention, a briefing would send those cards out, and Intelligence would be where you asked why.
+
+An insight card can say an opportunity is at risk. It can't say why, which other records are involved or what to do about it. Intelligence was meant to answer that. You open it from the card, or from a record's own page, and ask in plain words.
+
+I wrote the brief, and in it I named answer quality as the biggest risk in the whole plan. An answer about someone's pipeline that is wrong but sounds sure is worse than no answer at all.
+
+{/* TODO(mattias): Figure, mock. An insight card with its "Ask why" button, next to the conversation it opens.
+    Caption idea: "The card says what changed. Intelligence is where you ask why." */}
 
 ## Constraints
 
-{/* TODO(mattias) */}
+- Every figure in an answer traces back to a query the answer actually ran. If the data can't support an answer, it says so.
+- No question can reach another organisation's data, however it's worded. That has to hold even when the model is fooled.
+- Users write partner and record names, so anything read out of the data counts as data, never as an instruction.
+- The model gets no write path.
+- This part of the plan had two and a half to three weeks, and model calls stay in an EU region.
 
 ## Approach
 
-{/* TODO(mattias) */}
+You ask from the Intelligence page, from "Ask why" on an insight card, or from a panel on a record's page. The panel floats over the record, so you can still read it while you ask.
+
+Before the model sees anything, the backend looks for a snapshot of the organisation's data. It's a DuckDB file that holds only the rows that organisation can access, and it's rebuilt when the organisation's records change. A rebuild takes a second or two, and the screen says so instead of looking stuck.
+
+The model gets one tool for structured data. It can run a single read-only SELECT against that file. It reads a catalogue of the tables with worked example queries, and CI runs every example. Business definitions like open pipeline and revenue are built into the snapshot from the same constants the insight cards use, so a figure in chat matches the figure on the card. Money goes in as exact decimals, never as floats.
+
+The answer streams in blocks. The headline finding comes first, then the causes, the records involved and two to four follow-up questions. The model can't state a fact about a record. It names record ids, and code reads the facts for the sources rail back out of the snapshot. Charts and tables work the same way. The model points at a query result it already has and picks the columns. It never types a number into a chart.
+
+Every conversation is traced in Langfuse. A thumbs-up or a flag in the app lands as a score on the exact generation that wrote the answer, along with the user's comment.
+
+I built both the backend and the frontend.
+
+{/* TODO(mattias): Figure, mock. The path of one question: ask → snapshot → one SQL tool → streamed blocks → sources rail.
+    Caption idea: "The model reads one organisation's copy, and code checks every record it names." */}
 
 ## Decisions
 
-{/* TODO(mattias) */}
+<Decision title="One SQL tool instead of five hand-built ones" options={["Five curated query tools", "One read-only SQL tool over a per-organisation snapshot"]} chose="One read-only SQL tool over a per-organisation snapshot">
+My own brief said no free-form SQL, ever. The first version had five curated tools, each a query I had written, with the organisation bound in so the model could never name another one. It was safe, and it could answer five shapes of question. Every new question needed a new tool. Two weeks in I deleted all five. Safety used to rest on the model not writing SQL. Now it rests on the file it queries, which holds one organisation's rows and nothing else. A guard still allows one SELECT and nothing more. The agent can now answer questions nobody wrote a tool for. The price is that a bug in building the snapshot is now the worst kind of bug this feature can have.
+</Decision>
+
+<Decision title="One streamed pass instead of two" options={["Pro drafts, Flash reformats into blocks", "One streamed pass, parsed in code"]} chose="One streamed pass, parsed in code">
+The first version took 27.3 seconds to answer, and you saw nothing until the end. A second model call reformatted prose the first had already written. It took 7 to 13 seconds and added nothing. The first model also spent around 900 reasoning tokens a turn deciding which tool to call. The draft format was already strict, so I parse it in code, stream it as it's written and cap the reasoning. The first words now arrive at 12.9 seconds, and each answer costs about 12% less. I also measured the cheaper Flash model on this path and rejected it. It pulled from one tool where Pro used three, leaked raw column values into the prose and added up figures no tool had returned.
+</Decision>
+
+<Metric label="Time to first words" before="27.3s" after="12.9s" />
+
+<Decision title="The model drafts, the user creates" options={["Create the activity when the user says yes in chat", "Draft a card, and only the user's click creates it"]} chose="Draft a card, and only the user's click creates it">
+In September users asked to log activities by describing them. Creating the record when someone types "yes" would have been less work. But a "yes" in chat is weak permission for a write, and the details can drift between the offer and the call. So the model drafts a card. The click goes to a route that re-reads the stored draft, checks every id and the user's access again, and calls the same service as the normal form. Audit, notifications and the timeline entry happen once, in the usual place. The worst a prompt injection can do is put a visible card in front of someone.
+</Decision>
+
+{/* TODO(mattias): Figure, mock. A drafted activity card with Create activity and Discard.
+    Caption idea: "The model can draft. Only a click creates." */}
 
 ## When it broke
 
-{/* TODO(mattias) */}
+On 24 August I read a trace that should never have reached anyone. The question was "what do I need to do?" The model ran no query at all. It wrote the answer from the context it was opened with and invented two opportunities, with real-looking ids and $480,000 of value between them. When asked whether it had made them up, it queried the wrong column, found nothing, apologised and said a partner had no open opportunities. That partner had two.
+
+Three things had to go wrong at once for that answer to get through.
+
+- The model could answer without querying. Now its first step has to call a tool. I had also cut reasoning too far in the latency work. 512 tokens left no room to plan a query, so the cap went up to 2,048.
+- The code already knew those records didn't exist. The lookup that fills the sources rail couldn't find them, marked them unverified and let the prose keep the figures. Now an id the snapshot can't find costs the answer. The model gets one retry that names the missing ids, and after that the answer becomes a refusal.
+- The catalogue taught the wrong join. Its example for pipeline by partner grouped on the partner column, which is empty whenever the other side of a record is an end customer. Every record now resolves its counterparty, and a record brokered by an agent for a buyer belongs to both.
+
+The same day, "which open task is assigned to me?" came back as "could you tell me your full name?" The panel had the user's session the whole time and never told the model who was asking. Now it does.
+
+On 22 October the flags came off and every organisation got Intelligence.
 
 ## Next
 
-{/* TODO(mattias) */}
+Users check the answers. Nothing else does yet. Thumbs and flags land in Langfuse, but no test scores an answer before a prompt or model change ships. The first thing I'd build is a fixed set of questions with checked answers, plus injection tests, run on every change. After that I'd make files clickable. The agent can quote a PDF attached to an opportunity, but the user can't open it from the answer.
+
+Since then I treat the example queries a model reads as code that can be wrong. CI ran every one of them. The broken one passed, because it ran fine and returned the wrong answer.

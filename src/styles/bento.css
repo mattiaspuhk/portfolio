@@ -1,0 +1,107 @@
+/*
+ * The home page work bentos (WorkBento.astro), one per story: a field of soft light behind the
+ * story's tiles, and tiles that let the field through, each with a hairline that catches the light.
+ * Structure only: every value comes from tokens.css.
+ */
+
+/* How lit a story is, from 0 to 1. Hover and keyboard focus light it. Registered so it animates, and
+   inherited so a story's tiles, their hairlines and its arrow all light together. */
+@property --bento-lift {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@layer components {
+  /* Clipped, so a lit tile's glow stays in the field. */
+  .bento {
+    overflow: clip;
+    padding: var(--space-sm);
+    border-radius: calc(var(--radius-lg) + var(--space-sm));
+    background-color: var(--glow-field);
+    background-image:
+      radial-gradient(75% 95% at 0% 0%, var(--glow-light-1), transparent 72%),
+      radial-gradient(60% 80% at 100% 10%, var(--glow-light-3), transparent 72%),
+      radial-gradient(75% 90% at 70% 100%, var(--glow-light-2), transparent 75%);
+  }
+
+  /* The light comes up quickly and settles back slowly. */
+  .bento-story {
+    transition: --bento-lift var(--dur-slow) var(--ease);
+  }
+
+  /* A tile stacks its hairline and its content in one grid cell, so nothing in it needs positioning
+     and the story's title link can still cover every tile of the story. */
+  .bento-tile {
+    display: grid;
+    border-radius: var(--radius-lg);
+    /* Lit, the pane thins so more of the field comes through, and catches the main light at its top-left. */
+    background-color: color-mix(
+      in oklab,
+      var(--glow-veil) calc(var(--glow-pane) * (1 - var(--bento-lift) / 5)),
+      transparent
+    );
+    background-image: radial-gradient(
+      130% 110% at 0% 0%,
+      color-mix(in oklab, var(--glow-sheen) calc(var(--bento-lift) * 70%), transparent),
+      transparent 75%
+    );
+    /* The sheen on the top edge, and, lit, a soft glow beneath that lifts the tile off the field. */
+    box-shadow:
+      inset 0 var(--border-width) 0 var(--glow-sheen),
+      0 calc(var(--bento-lift) * var(--space-sm)) calc(var(--bento-lift) * var(--space-lg))
+        calc(var(--bento-lift) * -1 * var(--space-md))
+        color-mix(in oklab, var(--glow-edge) calc(var(--bento-lift) * 55%), transparent);
+  }
+
+  .bento-tile > * {
+    grid-area: 1 / 1;
+  }
+
+  /* The hairline: brightest at the top-left, where the field's main light is, fading around the tile.
+     Lit, it takes on more of the edge colour and the light runs further round. */
+  .bento-tile::before {
+    content: '';
+    grid-area: 1 / 1;
+    border-radius: inherit;
+    padding: var(--border-width);
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--glow-edge) calc(var(--bento-lift) * 50%), var(--glow-rim)),
+      transparent calc(36% + var(--bento-lift) * 12%) 68%,
+      var(--glow-rim-end)
+    );
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+
+  /* The way into the story. Lit, it takes the text colour and nudges the way it points. */
+  .bento-go {
+    color: color-mix(
+      in oklab,
+      var(--color-text) calc(var(--bento-lift) * 100%),
+      var(--color-muted)
+    );
+    translate: calc(var(--bento-lift) * 0.125rem) calc(var(--bento-lift) * -0.125rem);
+  }
+
+  .bento-story:has(a:focus-visible) {
+    --bento-lift: 1;
+    transition-duration: var(--dur-base);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .bento-story:hover {
+      --bento-lift: 1;
+      transition-duration: var(--dur-base);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bento-go {
+      translate: none;
+    }
+  }
+}

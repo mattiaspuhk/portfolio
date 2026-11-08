@@ -6,5 +6,9 @@ dist/
 .DS_Store
 _private/
 
-# Original CV export kept in the root; the committed copy is public/cv.pdf
-/Curriculum Vitae Mattias Puhk.pdf
+# CV exports kept in the root; the committed copy is public/cv.pdf
+/Curriculum Vitae*.pdf
+
+# Local working files: Claude drafts, CVs, screenshots, and per-machine Claude Code config
+/Claude outputs/
+.claude/

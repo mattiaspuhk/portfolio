@@ -1,0 +1,194 @@
+/*
+ * The dock: the main nav floats in a glass pill at the bottom of the window, with the theme toggle
+ * in a round glass button beside it. The page you're on sits under a lens, which carries a
+ * view-transition-name, so on navigation it slides along the pill to the next page. CSS only.
+ * Structure only: every value comes from tokens.css.
+ */
+
+@layer base {
+  body {
+    padding-bottom: var(--dock-clearance);
+  }
+}
+
+@layer components {
+  .dock {
+    /* One lens tall: the link's line box and padding, plus the inset on both sides */
+    --dock-height: calc(var(--text-sm) * 1.5 + 1rem + 2 * var(--dock-inset));
+
+    position: fixed;
+    inset-inline: 0;
+    bottom: max(var(--dock-offset), env(safe-area-inset-bottom));
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-xs);
+    padding-inline: var(--gutter);
+    /* The strip lets clicks through to the page; only the glass takes them */
+    pointer-events: none;
+  }
+
+  /* Glass: a thin tint of the page over a blur of whatever passes behind, light gathering at its edges */
+  .dock-glass {
+    position: relative;
+    isolation: isolate;
+    border-radius: 999px;
+    background: var(--dock-tint);
+    -webkit-backdrop-filter: blur(var(--dock-blur)) saturate(var(--dock-saturate));
+    backdrop-filter: blur(var(--dock-blur)) saturate(var(--dock-saturate));
+    box-shadow:
+      inset 0 0 0 1px var(--dock-edge),
+      inset 0 0 14px var(--dock-glow),
+      var(--dock-shadow);
+    pointer-events: auto;
+  }
+
+  /* Sheen: light falling on the glass from above */
+  .dock-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(to bottom, var(--dock-sheen), transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Rim: a 1px edge that catches the light at the top left and again, fainter, at the bottom right */
+  .dock-glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      var(--dock-rim),
+      var(--dock-rim-faint) 35%,
+      var(--dock-rim-faint) 65%,
+      var(--dock-rim-low)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* On a phone the pill takes the width beside the toggle, one equal share per page */
+  .dock-nav {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .dock-list {
+    display: flex;
+    gap: 2px;
+    padding: var(--dock-inset);
+  }
+
+  .dock-list > li {
+    flex: 1;
+  }
+
+  .dock-link {
+    position: relative;
+    isolation: isolate;
+    display: block;
+    padding: 0.5rem 0;
+    border-radius: 999px;
+    color: var(--dock-ink);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: center;
+    transition:
+      color var(--dur-slow) var(--ease),
+      background-color var(--dur-slow) var(--ease);
+  }
+
+  .dock-link[aria-current='page'] {
+    color: var(--color-text);
+  }
+
+  /* The lens under the page you're on */
+  .dock-lens {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--dock-lens);
+    box-shadow:
+      inset 0 1px 0 var(--dock-rim),
+      var(--dock-lens-shadow);
+    view-transition-name: dock-lens;
+  }
+
+  .dock-toggle {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: var(--dock-height);
+    height: var(--dock-height);
+    color: var(--dock-ink);
+    transition: color var(--dur-slow) var(--ease);
+  }
+
+  .dock-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  /* The toggle shows where it goes: a moon in the light theme, a sun in the dark */
+  :root:not([data-theme='dark']) .dock-icon-sun,
+  [data-theme='dark'] .dock-icon-moon {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .dock-link:hover {
+      color: var(--color-text);
+      background-color: var(--dock-hover);
+      transition-duration: var(--dur-base);
+    }
+
+    .dock-toggle:hover {
+      color: var(--color-text);
+      transition-duration: var(--dur-base);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .dock-nav {
+      flex: none;
+    }
+
+    .dock-list > li {
+      flex: none;
+    }
+
+    .dock-link {
+      padding-inline: 1rem;
+    }
+  }
+
+  /* Without a blur behind it the tint is too thin to read through, so it thickens */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .dock-glass {
+      background: var(--dock-tint-solid);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .dock-glass {
+      background: var(--dock-tint-solid);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}

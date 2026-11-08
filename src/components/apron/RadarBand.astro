@@ -1,0 +1,382 @@
+---
+// The storm behind the home page hero, full bleed. The storm is a function of place and time
+// (lib/apron/radar.ts); the script below paints it on a canvas at the screen's pixel density, so
+// every cell and gap lands on whole device pixels, drifts it along its line, and lets the pointer
+// warm the cells it passes. Without JS the start of the drift shows as an SVG band along the
+// hero's foot. Decorative.
+import { fieldPaths, radarField } from '@/lib/apron/radar';
+
+const field = radarField();
+const { levels, grid } = fieldPaths(field);
+---
+
+<div
+  class="radar"
+  data-radar
+  style={`--radar-cols: ${field.cols}; --radar-rows: ${field.rows}`}
+  aria-hidden="true"
+>
+  <canvas></canvas>
+  <noscript>
+    <svg viewBox={`0 0 ${field.cols} ${field.rows}`} shape-rendering="crispEdges">
+      {levels.map((d, i) => <path class={`radar-level-${i + 1}`} d={d} />)}
+      <path class="radar-grid" d={grid} />
+    </svg>
+  </noscript>
+</div>
+
+<script>
+  import { HERO, clearAir, thresholds, weather } from '@/lib/apron/radar';
+
+  // Paints the radar. The canvas covers the hero, which fills the first screen, and reaches up to
+  // the top of the page and a little past the hero's foot, so the storm runs off the top and both
+  // sides of any screen and dissolves just below it. It frays around anything marked data-radar-clear, line by line, so the words always sit
+  // in clear air. The storm drifts along its line and boils as it goes. Under a mouse the nearby
+  // cells warm up the --radar-* ramp and the empty grid shows faintly, rising in 200ms and cooling
+  // over 600ms. Reduced motion holds the storm still.
+  const band = document.querySelector<HTMLElement>('[data-radar]');
+  const canvas = band?.querySelector('canvas');
+  const ctx = canvas?.getContext('2d');
+  const hero = band?.closest<HTMLElement>('.hero');
+  if (band && canvas && ctx && hero) {
+    const FLOW = 1.5; // cells a second the storm drifts along its line
+    const SETTLE = 160; // ms time constant of a cell moving to its new level
+    const SPILL = 10; // cells the storm runs on past the hero's foot, thinning out as it goes
+    const CLEARING = { clear: 12, fray: 32, soft: 64 }; // CSS px the storm keeps off the words
+    const RADIUS = 76; // CSS px around the pointer that warms
+    const WARM = 2.6; // ramp steps a cell climbs at the pointer
+    const GHOST = 0.55; // how strongly an empty cell shows at the pointer
+    const RISE = 60; // ms time constants: ~200ms in, ~600ms out
+    const FALL = 200;
+    const STEPS = 32; // colours between two ramp tokens
+
+    const sky = weather();
+    const levels = thresholds(sky);
+    const clearing = clearAir(CLEARING);
+    const still = matchMedia('(prefers-reduced-motion: reduce)');
+    const smooth = (t: number) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
+
+    // The ramp, --radar-1 … --radar-5 resolved by the browser so any colour syntax works, as
+    // little-endian RGBA words with the alpha left empty
+    const ramp = new Uint32Array(4 * STEPS + 1);
+    const readRamp = () => {
+      const probe = document.createElement('canvas').getContext('2d', { willReadFrequently: true })!;
+      const styles = getComputedStyle(band);
+      const stops = [1, 2, 3, 4, 5].map((n) => {
+        probe.clearRect(0, 0, 1, 1);
+        probe.fillStyle = styles.getPropertyValue(`--radar-${n}`).trim();
+        probe.fillRect(0, 0, 1, 1);
+        return probe.getImageData(0, 0, 1, 1).data;
+      });
+      for (let s = 0; s < ramp.length; s++) {
+        const at = Math.min(3, Math.floor(s / STEPS));
+        const t = s / STEPS - at;
+        const [a, b] = [stops[at]!, stops[at + 1]!];
+        const mix = (c: number) => Math.round(a[c]! + (b[c]! - a[c]!) * t);
+        ramp[s] = mix(0) | (mix(1) << 8) | (mix(2) << 16);
+      }
+    };
+
+    // How far the canvas reaches past the hero, in CSS px: up to the top of the page, a little past
+    // its foot
+    const cellSize = () => parseFloat(getComputedStyle(band).getPropertyValue('--radar-cell')) || 9;
+    const reach = () => {
+      const above = band.getBoundingClientRect().top + scrollY;
+      band.style.setProperty('--radar-above', `${Math.round(above)}px`);
+      band.style.setProperty('--radar-below', `${Math.round(SPILL * cellSize())}px`);
+    };
+
+    // Grid geometry in device pixels: whole-pixel pitch, a hairline gap, covering the canvas
+    let scale = 1; // device pixels per CSS pixel
+    let pitch = 1;
+    let size = 1;
+    let x0 = 0;
+    let y0 = 0;
+    let cols = 0;
+    let rows = 0;
+    let gaps = new Path2D();
+    // Per column: across the screen (0–1), the drift, the line's centre
+    let across = new Float32Array(0);
+    let drift = new Float32Array(0);
+    let line = new Float32Array(0);
+    // Per row: down the canvas
+    let down = new Float32Array(0);
+    // Per cell: how much return it can show (clear air, fade at the edges), the level it's heading
+    // for, the level it shows (alpha and place on the ramp), pointer warmth and its grain
+    let room = new Float32Array(0);
+    let target = new Uint8Array(0);
+    let alpha = new Float32Array(0);
+    let place = new Float32Array(0);
+    let heat = new Float32Array(0);
+    let grain = new Float32Array(0);
+    // One pixel per cell, drawn up to the pitch without smoothing
+    const cells = document.createElement('canvas');
+    const cellsCtx = cells.getContext('2d')!;
+    let image = cellsCtx.createImageData(1, 1);
+    let pixels = new Uint32Array(image.data.buffer);
+
+    // Where the storm is
+    let clock = 0; // ms the storm has been moving
+    const advance = () => drift.fill(still.matches ? 0 : (clock / 1000) * FLOW);
+
+    // Levels the cells head for: all of them, or a third in turn, which the settling hides
+    let turn = 0;
+    const sample = (all: boolean) => {
+      for (let i = 0; i < cols; i++) line[i] = sky.centre(HERO, across[i]!, i, drift[i]!);
+      for (let j = 0; j < rows; j++) {
+        for (let i = all ? 0 : (turn + j) % 3; i < cols; i += all ? 1 : 3) {
+          const k = j * cols + i;
+          const open = room[k]!;
+          const f = open < 0.01 ? 0 : sky.strength(i, j, down[j]!, line[i]!, HERO.spread, drift[i]!) * open;
+          target[k] = f > 0 ? sky.level(f, i, j, drift[i]!, levels) : 0;
+        }
+      }
+      turn = (turn + 1) % 3;
+    };
+
+    // Pointer, in client pixels
+    let mouse = false;
+    let mx = 0;
+    let my = 0;
+
+    // Moves every cell toward its level and the pointer's warmth, then paints. Returns whether
+    // anything is still changing.
+    const paint = (dt: number) => {
+      const settle = 1 - Math.exp(-dt / SETTLE);
+      const rise = 1 - Math.exp(-dt / RISE);
+      const fall = 1 - Math.exp(-dt / (still.matches ? RISE : FALL));
+      const box = canvas.getBoundingClientRect();
+      const reachCells = (RADIUS * scale) / pitch;
+      const inside = mouse && mx >= box.left && mx < box.right && my >= box.top && my < box.bottom;
+      const px = ((mx - box.left) * scale - x0) / pitch;
+      const py = ((my - box.top) * scale - y0) / pitch;
+      const top = ramp.length - 1;
+      let busy = false;
+      for (let j = 0; j < rows; j++) {
+        const dy = j + 0.5 - py;
+        const near = inside && Math.abs(dy) < reachCells;
+        for (let i = 0; i < cols; i++) {
+          const k = j * cols + i;
+          // Level
+          const t = target[k]!;
+          let a = alpha[k]!;
+          let p = place[k]!;
+          if (t) {
+            const to = t - 1;
+            if (a < 0.05) p = to;
+            a += (1 - a) * settle;
+            p += (to - p) * settle;
+            if (a > 0.997) a = 1;
+            if (Math.abs(to - p) < 0.003) p = to;
+          } else {
+            a -= a * settle;
+            if (a < 0.004) a = 0;
+          }
+          if (a !== alpha[k] || p !== place[k]) busy = true;
+          alpha[k] = a;
+          place[k] = p;
+          // Pointer warmth, ragged rather than a disc
+          let warm = 0;
+          if (near) {
+            const d = Math.hypot(i + 0.5 - px, dy) / reachCells;
+            if (d < 1) warm = grain[k]! * (1 - d * d) ** 2;
+          }
+          let h = heat[k]!;
+          if (h !== warm) {
+            h += (warm - h) * (warm > h ? rise : fall);
+            if (Math.abs(h - warm) < 0.004) h = warm;
+            heat[k] = h;
+            busy = true;
+          }
+          // Colour: warmth lifts a cell up the ramp and shows the empty grid faintly
+          const lift = h * WARM;
+          const ghost = h * GHOST * room[k]!;
+          let shown = a;
+          let at = p + lift;
+          if (ghost > a) {
+            shown = ghost;
+            if (a < 0.02) at = lift * 0.5;
+          }
+          pixels[k] =
+            shown < 0.004 ? 0 : (ramp[Math.max(0, Math.min(top, Math.round(at * STEPS)))]! | (Math.round(shown * 255) << 24)) >>> 0;
+        }
+      }
+      cellsCtx.putImageData(image, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(cells, x0, y0, cols * pitch, rows * pitch);
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fill(gaps);
+      ctx.globalCompositeOperation = 'source-over';
+      return busy;
+    };
+
+    const layout = (width: number, height: number) => {
+      if (!width || !height) return;
+      canvas.width = width;
+      canvas.height = height;
+      ctx.imageSmoothingEnabled = false;
+      scale = width / (canvas.clientWidth || width);
+      pitch = Math.max(2, Math.round(cellSize() * scale));
+      size = pitch - Math.max(1, Math.round(pitch * 0.16));
+      cols = Math.ceil(width / pitch) + 1;
+      rows = Math.ceil(height / pitch) + 1;
+      x0 = Math.floor((width - cols * pitch) / 2);
+      y0 = Math.floor((height - rows * pitch) / 2);
+
+      const gap = pitch - size;
+      gaps = new Path2D();
+      for (let i = 0; i < cols; i++) gaps.rect(x0 + i * pitch + size, 0, gap, height);
+      for (let j = 0; j < rows; j++) gaps.rect(0, y0 + j * pitch + size, width, gap);
+
+      const count = cols * rows;
+      across = new Float32Array(cols);
+      drift = new Float32Array(cols);
+      line = new Float32Array(cols);
+      down = new Float32Array(rows);
+      room = new Float32Array(count);
+      target = new Uint8Array(count);
+      alpha = new Float32Array(count);
+      place = new Float32Array(count);
+      heat = new Float32Array(count);
+      grain = new Float32Array(count);
+      cells.width = cols;
+      cells.height = rows;
+      image = cellsCtx.createImageData(cols, rows);
+      pixels = new Uint32Array(image.data.buffer);
+
+      // The squall is measured from the top of the page to the hero's foot, so it fills the first
+      // screen corner to corner and runs off its edges; past the foot it thins out
+      const spill = SPILL * pitch;
+      const frame = height - spill;
+      for (let i = 0; i < cols; i++) across[i] = (x0 + (i + 0.5) * pitch) / width;
+      for (let j = 0; j < rows; j++) down[j] = (y0 + (j + 0.5) * pitch) / frame;
+
+      // Clear air: the line boxes of the words, in device pixels on the canvas
+      const origin = canvas.getBoundingClientRect();
+      const range = document.createRange();
+      const words = [...document.querySelectorAll('[data-radar-clear]')].flatMap((el) => {
+        range.selectNodeContents(el);
+        return [...range.getClientRects()]
+          .filter((r) => r.width && r.height)
+          .map((r) => [(r.left - origin.left) * scale, (r.top - origin.top) * scale, (r.right - origin.left) * scale, (r.bottom - origin.top) * scale]);
+      });
+      for (let j = 0; j < rows; j++) {
+        const cy = y0 + (j + 0.5) * pitch;
+        const edge = smooth((height - cy) / spill);
+        for (let i = 0; i < cols; i++) {
+          const k = j * cols + i;
+          const cx = x0 + (i + 0.5) * pitch;
+          let nearest = Infinity;
+          for (const [l, t, r, b] of words) {
+            const d = Math.hypot(Math.max(l! - cx, 0, cx - r!), Math.max(t! - cy, 0, cy - b!));
+            if (d < nearest) nearest = d;
+          }
+          // Past the hero's foot, cells drop out at random as well as fading, so no edge runs straight
+          const thin = edge < 1 && ((Math.imul(k, 0x9e3779b1) >>> 0) % 1024) / 1023 > edge * 1.15;
+          room[k] = thin ? 0 : edge * clearing(i, j, nearest / scale);
+          grain[k] = 0.65 + 0.35 * (((Math.imul(k, 2654435761) >>> 0) % 1024) / 1023);
+        }
+      }
+
+      // Start settled
+      advance();
+      sample(true);
+      for (let k = 0; k < count; k++) {
+        alpha[k] = target[k] ? 1 : 0;
+        place[k] = target[k]! - 1;
+      }
+      paint(0);
+      wake();
+    };
+    const relayout = () => cols && layout(canvas.width, canvas.height);
+
+    // Runs while the storm is on screen: always while it moves, otherwise until it settles
+    let seen = false;
+    let frame = 0;
+    let last = 0;
+    const tick = (now: number) => {
+      const dt = Math.min(64, now - last);
+      last = now;
+      const moving = !still.matches;
+      if (moving) {
+        clock += dt;
+        advance();
+        sample(false);
+      }
+      const busy = paint(dt);
+      frame = seen && (moving || busy) ? requestAnimationFrame(tick) : 0;
+    };
+    const wake = () => {
+      if (frame || !seen) return;
+      last = performance.now();
+      frame = requestAnimationFrame(tick);
+    };
+
+    readRamp();
+    new MutationObserver(() => {
+      readRamp();
+      paint(0);
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    still.addEventListener('change', () => {
+      advance();
+      sample(true);
+      wake();
+    });
+
+    // Size the backing store to the exact device pixels the canvas covers
+    const resize = new ResizeObserver(([entry]) => {
+      if (!entry) return;
+      const device = entry.devicePixelContentBoxSize?.[0];
+      layout(
+        device?.inlineSize ?? Math.round(entry.contentRect.width * devicePixelRatio),
+        device?.blockSize ?? Math.round(entry.contentRect.height * devicePixelRatio),
+      );
+    });
+    try {
+      resize.observe(canvas, { box: 'device-pixel-content-box' });
+    } catch {
+      resize.observe(canvas);
+    }
+    // The words move when the hero reflows or the fonts arrive
+    reach();
+    new ResizeObserver(() => {
+      reach();
+      relayout();
+    }).observe(hero);
+    document.fonts.ready.then(relayout);
+    // Moving to a screen with another density doesn't always resize the canvas
+    const watchDensity = () =>
+      matchMedia(`(resolution: ${devicePixelRatio}dppx)`).addEventListener(
+        'change',
+        () => {
+          layout(Math.round(canvas.clientWidth * devicePixelRatio), Math.round(canvas.clientHeight * devicePixelRatio));
+          watchDensity();
+        },
+        { once: true },
+      );
+    watchDensity();
+
+    addEventListener(
+      'pointermove',
+      (event) => {
+        if (event.pointerType !== 'mouse') return;
+        mx = event.clientX;
+        my = event.clientY;
+        mouse = true;
+        wake();
+      },
+      { passive: true },
+    );
+    document.documentElement.addEventListener('pointerleave', () => {
+      mouse = false;
+      wake();
+    });
+
+    new IntersectionObserver(([entry]) => {
+      seen = !!entry?.isIntersecting;
+      wake();
+    }).observe(canvas);
+
+    band.dataset.ready = '';
+  }
+</script>

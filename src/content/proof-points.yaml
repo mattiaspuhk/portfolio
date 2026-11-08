@@ -3,24 +3,24 @@
 
 - id: org-identity
   title: Unified organisation identity
-  detail: 'TODO(mattias)'
+  detail: 'Merged the legacy company models into one.'
   year: 0
   order: 1
 
 - id: cloud-tasks
   title: Email jobs moved from BullMQ to Cloud Tasks
-  detail: 'TODO(mattias)'
+  detail: 'Moved email processing to Google Cloud Tasks.'
   year: 0
   order: 2
 
 - id: nestjs-migration
   title: NestJS migration
-  detail: 'TODO(mattias)'
+  detail: 'Moved the backend onto NestJS during the platform rebuild.'
   year: 0
   order: 3
 
 - id: design-system
   title: Design system and virtualised DataTable
-  detail: 'TODO(mattias)'
+  detail: 'Built the shared React UI library, including a virtualised DataTable.'
   year: 0
   order: 4

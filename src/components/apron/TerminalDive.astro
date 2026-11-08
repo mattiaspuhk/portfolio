@@ -1,0 +1,42 @@
+---
+// The case study's half of clicking a plane in the home page's terminal scene (Terminal.astro).
+// Cross-document view transitions are styled by the page you arrive on, so this page knows where
+// its stand was in the scene. A clean handoff with one moving part: the plane, named while hovered
+// or focused, flies into this header as a single sharp image (the header's own drawing, scaled down
+// at the start rather than the small snapshot scaled up). Around it the apron and the rest of the
+// old page ease out first, with the apron pushing in a touch towards the stand; only then does this
+// page come in, title last, so the two pages never show at once. Transform and opacity only.
+// The page's own fade follows the same order whichever page you arrive from.
+import type { CollectionEntry } from 'astro:content';
+import { terminalScene } from '@/lib/apron/terminal';
+import { byOrder, getPublished } from '@/lib/content';
+import { standNumber } from '@/lib/format';
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+}
+
+const { entry } = Astro.props;
+const work = (await getPublished('work')).sort(byOrder);
+const index = work.findIndex((item) => item.id === entry.id);
+const hit = index >= 0 ? terminalScene(work.map((item) => item.data.aircraft)).stands[index]!.hit : undefined;
+const at = (n: number) => `${Math.round(n * 100) / 100}%`;
+const stand = `stand-${standNumber(entry.data.order)}`;
+const ease = 'cubic-bezier(0.22,1,0.36,1)';
+
+const css =
+  hit &&
+  `::view-transition-old(apron){transform-origin:${at(hit.x + hit.w / 2)} ${at(hit.y + hit.h / 2)};animation:terminal-push 200ms ease-in both}` +
+    `::view-transition-old(root),::view-transition-old(*.peek),::view-transition-old(${stand}){animation:terminal-out 160ms ease-in both}` +
+    `::view-transition-new(root){animation:terminal-in 340ms 170ms ease-out both}` +
+    `::view-transition-group(${stand}){animation-duration:680ms;animation-timing-function:${ease}}` +
+    `::view-transition-new(${stand}){animation:terminal-in 160ms ease-out both}` +
+    `::view-transition-new(${stand}-title):only-child{animation:terminal-rise 460ms 220ms ${ease} both}` +
+    `@keyframes terminal-push{to{transform:scale(1.06);opacity:0}}` +
+    `@keyframes terminal-out{to{opacity:0}}` +
+    `@keyframes terminal-in{from{opacity:0}}` +
+    `@keyframes terminal-rise{from{opacity:0;transform:translateY(10px)}}` +
+    `@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}`;
+---
+
+{css && <Fragment set:html={`<style>${css}</style>`} />}

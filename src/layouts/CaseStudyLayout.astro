@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { site } from '@/config/site';
+import TerminalDive from '@/components/apron/TerminalDive.astro';
 import BeatNav from '@/components/work/BeatNav.astro';
 import Pager from '@/components/work/Pager.astro';
 import SummaryCard from '@/components/work/SummaryCard.astro';
@@ -16,16 +17,20 @@ interface Props {
 }
 
 const { entry, minutesRead, prev, next } = Astro.props;
-const { title, summary, org, role, period, stack, metrics, tldr, disclosure } = entry.data;
+const { title, summary, order, aircraft, org, role, period, stack, metrics, tldr, disclosure } = entry.data;
 const toLink = (work?: Work) => work && { href: `/work/${work.id}`, title: work.data.title };
 const notices = { 'mock-data': site.labels.mockDataNotice, concept: site.labels.concept };
 const notice = disclosure && notices[disclosure];
 ---
 
 <BaseLayout title={title} description={summary}>
+  <TerminalDive entry={entry} />
   <article class="flex flex-col gap-(--space-xl) py-(--space-lg)">
     <SummaryCard
       title={title}
+      summary={summary}
+      order={order}
+      aircraft={aircraft}
       org={org}
       role={role}
       period={period}

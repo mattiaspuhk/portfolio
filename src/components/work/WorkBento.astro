@@ -1,0 +1,106 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Arrow from '@/components/site/Arrow.astro';
+import { site } from '@/config/site';
+import { formatPeriod } from '@/lib/format';
+
+interface Props {
+  /**
+   * Sorted. Each story gets a bento of its own: a big tile for the story, a tile for its first
+   * metric when it has one, and a tile for its period and role.
+   */
+  entries: CollectionEntry<'work'>[];
+  /** Heading level of the story titles, to fit the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { entries, headingLevel = 2 } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+const { metric: metricLabels, summary: summaryLabels } = site.labels;
+
+// The field, the tiles and the light come from bento.css; this is the layout inside each tile.
+// Every tile takes the same inset, so labels and last lines line up across the gaps.
+const tileBody = 'flex flex-col gap-(--space-xs) p-(--space-md) lg:p-(--space-lg)';
+const label = 'text-sm text-muted';
+// The title link covers its whole bento, so any tile of it opens the case study.
+const titleLink = 'after:absolute after:inset-0 focus-visible:outline-none';
+// Each story is a field of its own, so it's plain where one story ends and the next begins. The tiles
+// stack on phones. From sm the story tile runs full width over the other two. From lg all three sit in
+// one row, so each gets the full height and the labels and last lines line up across it. The metric
+// gets more of the row than the period and role, so a figure like 27.3s → 12.9s stays on one line.
+const story =
+  'bento bento-story relative grid gap-(--space-sm) sm:grid-cols-2 lg:grid-cols-[6fr_4fr_3fr] has-[a:focus-visible]:outline-(length:--focus-ring-width) has-[a:focus-visible]:outline-offset-(--focus-ring-offset) has-[a:focus-visible]:outline-accent';
+---
+
+{
+  entries.length > 0 && (
+    <ul class="flex flex-col gap-(--space-lg)">
+      {entries.map((entry) => {
+        const { title, summary, org, role, period } = entry.data;
+        const metric = entry.data.metrics[0];
+        return (
+          <li>
+            <article class={story}>
+              <div
+                class:list={[
+                  'bento-tile min-h-64 sm:col-span-full',
+                  metric ? 'lg:col-span-1' : 'lg:col-span-2',
+                ]}
+              >
+                <div class={tileBody}>
+                  <div class="flex items-center justify-between gap-(--space-sm)">
+                    <p class={label}>{org}</p>
+                    <Arrow direction="up-right" class="bento-go size-4 shrink-0" />
+                  </div>
+                  <div class="mt-auto flex flex-col gap-(--space-xs)">
+                    <Heading class="text-3xl tracking-tight">
+                      <a href={`/work/${entry.id}`} class={titleLink}>
+                        {title}
+                      </a>
+                    </Heading>
+                    <p class="max-w-(--measure) text-muted">{summary}</p>
+                  </div>
+                </div>
+              </div>
+              {metric && (
+                <div class="bento-tile min-h-32">
+                  <div class={tileBody}>
+                    <p class={label}>{metric.label}</p>
+                    <p class="mt-auto flex flex-wrap items-center gap-(--space-sm) text-3xl tracking-tight tabular-nums">
+                      {metric.before && (
+                        <>
+                          <span class="text-muted">
+                            <span class="sr-only">{metricLabels.before}</span>
+                            {metric.before}
+                          </span>
+                          <Arrow class="size-[0.75em] shrink-0 text-muted" />
+                        </>
+                      )}
+                      <span>
+                        <span class="sr-only">{metricLabels.after}</span>
+                        {metric.after}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
+              {/* A date range and a line about the work read as what they are, so their labels are for screen readers only. */}
+              <div class:list={['bento-tile min-h-32', !metric && 'sm:col-span-full lg:col-span-1']}>
+                <dl class={tileBody}>
+                  <div>
+                    <dt class="sr-only">{summaryLabels.period}</dt>
+                    <dd class={label}>{formatPeriod(period, site.labels.present)}</dd>
+                  </div>
+                  <div class="mt-auto">
+                    <dt class="sr-only">{summaryLabels.role}</dt>
+                    <dd>{role}</dd>
+                  </div>
+                </dl>
+              </div>
+            </article>
+          </li>
+        );
+      })}
+    </ul>
+  )
+}

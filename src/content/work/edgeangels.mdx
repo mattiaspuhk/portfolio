@@ -1,0 +1,121 @@
+---
+# Images go in src/assets/work/edgeangels/ and are imported at the top of this file.
+# Draft text, timeline and the full screenshot set: Claude outputs/edgeangels-hackathon/ (storyline.md).
+title: 'TODO(mattias)'
+summary: 'TODO(mattias)'
+order: 4
+org: 'Road to START Hack'
+role: 'TODO(mattias)' # team size and what you owned aren't in the repo
+period:
+  start: 2025-11-29 # first commit Sat 19:26, last commit Sun 11:57 (CET)
+  end: 2025-11-30
+stack: ['Next.js 16', 'React 19', 'Tailwind 4', 'shadcn/ui', 'Clerk', 'Recharts', 'ethers', 'Solidity (Sepolia)']
+metrics: [] # TODO(mattias): e.g. 30 commits in 16 h 31 m, 9 routes, 15 startups registered on Sepolia
+# cover: ../../assets/work/edgeangels/detail-hero.jpg # TODO(mattias): pick a cover; needs coverAlt
+disclosure: mock-data
+draft: true
+aircraft: prop
+---
+
+import feed from '@/assets/work/edgeangels/feed.jpg';
+import landingSearch from '@/assets/work/edgeangels/landing-search.jpg';
+import dockFilters from '@/assets/work/edgeangels/dock-filters.jpg';
+import detailSidebar from '@/assets/work/edgeangels/detail-sidebar.jpg';
+import investBar from '@/assets/work/edgeangels/invest-bar.jpg';
+import confirmVoting from '@/assets/work/edgeangels/confirm-voting.jpg';
+import capTable from '@/assets/work/edgeangels/cap-table.jpg';
+import portfolio from '@/assets/work/edgeangels/portfolio.jpg';
+import voting from '@/assets/work/edgeangels/voting.jpg';
+import chartMissingLine from '@/assets/work/edgeangels/chart-missing-line.jpg';
+import phoneDockClipped from '@/assets/work/edgeangels/phone-dock-clipped.jpg';
+
+## Problem
+
+{/* TODO(mattias) */}
+
+<Figure
+  src={feed}
+  alt="Opportunities page with a navy editor's pick hero for SkyMed Delivery, investment brief cards with share prices and sparklines, and a floating dock at the bottom."
+  mock
+/>
+
+## Constraints
+
+{/* TODO(mattias) */}
+
+## Approach
+
+{/* TODO(mattias). The commit-by-commit timeline of the night is in storyline.md. */}
+
+## Decisions
+
+{/* TODO(mattias). Suggested order: landing search, dock, detail page, invest bar, cap table, portfolio and voting.
+    Candidates for <Decision>: filters in a bottom dock vs a sidebar; invest bar hidden until after traction. */}
+
+<Figure
+  src={landingSearch}
+  alt="Landing page hero with the industry select open inside the search pill, listing seven sectors."
+  mock
+/>
+
+<Figure
+  src={dockFilters}
+  alt="Filter panel above the bottom dock with six selects. Sector is set to CleanTech and the Filters button shows a count of 1."
+  mock
+/>
+
+<Figure
+  src={detailSidebar}
+  alt="SkyMed Delivery detail page mid-scroll: story text, a drone photo carousel, and a sticky sidebar with company metrics and My Position."
+  mock
+/>
+
+<Figure
+  src={investBar}
+  alt="Expanded invest bar with a minus and plus stepper around €100, 8 shares, 0.0012% ownership and a Commit €100 button."
+  mock
+/>
+
+<Figure
+  src={confirmVoting}
+  alt="Confirm Investment dialog with With Voting Rights selected at €14.32 per share: €500 buys 34 shares."
+  mock
+/>
+
+<Figure
+  src={capTable}
+  alt="Cap table section marked On-Chain Verified, showing the founder address, a registration date of Nov 30, 2025 and startup ID 0, with an empty shareholder registry."
+  mock
+/>
+
+<Figure
+  src={portfolio}
+  alt="My Portfolio page: €5,007.50 value, an allocation donut across three sectors, a performance card and a holdings table."
+  mock
+/>
+
+<Figure
+  src={voting}
+  alt="Series A funding round vote: Approve leads with 78.8%, with distribution bars, 847 voters and the user's voting power."
+  mock
+/>
+
+## When it broke
+
+{/* TODO(mattias) */}
+
+<Figure
+  src={chartMissingLine}
+  alt="Share price card on the 1Y timeframe where the chart is a dark shape with no visible line."
+  mock
+/>
+
+<Figure
+  src={phoneDockClipped}
+  alt="The bottom dock on a 390 px phone screen, with the All button cut off at the left edge."
+  mock
+/>
+
+## Next
+
+{/* TODO(mattias) */}

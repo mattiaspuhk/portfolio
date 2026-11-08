@@ -1,0 +1,521 @@
+/*
+ * The apron: the home page hero and stands, and the case-study header (apron components).
+ * Each project parks on a stand: a plane drawn at build time, the stand's markings, and a spec
+ * table. Hover and keyboard focus switch the stand's light on; the case-study header keeps it on.
+ * Structure only: every value comes from tokens.css.
+ */
+
+@layer components {
+  /* ---------- Hero: the name and role in clear air, the storm all around ---------- */
+
+  /* The whole first screen, the words centred in it: the screen less the header's padding and the
+     page's top padding above the hero. The radar's canvas paints under the words. */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--space-lg);
+    min-height: calc(100svh - 2 * var(--space-md) - var(--space-xl));
+  }
+
+  /* Inter Light at its display optical size, tracked in tight as large grotesks are */
+  .headline {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+
+  /* The headline's last words, on a line of their own */
+  .headline-role {
+    display: block;
+  }
+
+  /* Halation, as on film: dark ink, and light that bleeds red off the letters' edges and builds
+     along the line. Behind the words, a blurred copy in --halo, faint at the start and full at the
+     end; over them, a copy in --halo-ink that tints the ink toward the end. Both copies come from
+     data-halo and are hidden from assistive tech. A mask clips to its box, so each copy's box
+     reaches half an em past the line, with padding that puts its letters back over the ink:
+     descenders and the glow's spread stay inside. */
+  .halo {
+    position: relative;
+    isolation: isolate;
+    width: fit-content;
+    color: color-mix(in oklab, var(--color-text) 72%, var(--halo-ink));
+  }
+
+  .halo::before,
+  .halo::after {
+    content: attr(data-halo);
+    content: attr(data-halo) / '';
+    position: absolute;
+    inset: -0.5em;
+    padding: 0.5em;
+    pointer-events: none;
+  }
+
+  .halo::before {
+    z-index: -1;
+    color: var(--halo);
+    -webkit-text-stroke: 0.03em var(--halo);
+    filter: blur(0.05em);
+    -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 0.15) 10%, black 88%);
+    mask-image: linear-gradient(to right, rgb(0 0 0 / 0.15) 10%, black 88%);
+  }
+
+  .halo::after {
+    color: var(--halo-ink);
+    -webkit-mask-image: linear-gradient(to right, transparent 25%, black);
+    mask-image: linear-gradient(to right, transparent 25%, black);
+  }
+
+  @media (forced-colors: active) {
+    .halo::before,
+    .halo::after {
+      display: none;
+    }
+  }
+
+  .hero-intro {
+    max-width: 40rem;
+    font-size: var(--text-lg);
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+
+  .hero-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375em;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--color-border);
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color var(--dur-base) var(--ease);
+  }
+
+  .hero-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .hero-link svg {
+    width: 0.875em;
+    height: 0.875em;
+  }
+
+  /* ---------- Radar: the storm behind the whole hero, full bleed, square cells on whole pixels ---------- */
+
+  /* The same cell size on every screen */
+  .radar {
+    --radar-cell: 9px;
+    position: absolute;
+    inset-block: 0;
+    left: 50%;
+    width: 100vw;
+    translate: -50%;
+    pointer-events: none;
+  }
+
+  /* The canvas reaches past the hero, as far as the script says: up to the top of the page and a
+     little past the hero's foot, so the storm dissolves into the page. It paints, then fades up. */
+  .radar canvas {
+    position: absolute;
+    top: calc(-1 * var(--radar-above, 0px));
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: calc(100% + var(--radar-above, 0px) + var(--radar-below, 0px));
+    opacity: 0;
+    transition: opacity var(--dur-slow) var(--ease);
+  }
+
+  .radar[data-ready] canvas {
+    opacity: 1;
+  }
+
+  /* Without JS: the band as an SVG along the hero's foot, one cell per --radar-cell, centred */
+  .radar svg {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    z-index: -1;
+    width: calc(var(--radar-cols) * var(--radar-cell));
+    height: calc(var(--radar-rows) * var(--radar-cell));
+    translate: -50%;
+  }
+
+  .radar-level-1 {
+    fill: var(--radar-1);
+  }
+  .radar-level-2 {
+    fill: var(--radar-2);
+  }
+  .radar-level-3 {
+    fill: var(--radar-3);
+  }
+  .radar-level-4 {
+    fill: var(--radar-4);
+  }
+  .radar-level-5 {
+    fill: var(--radar-5);
+  }
+
+  .radar-grid {
+    fill: none;
+    stroke: var(--color-bg);
+    stroke-width: 1.5px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* ---------- Section heads ---------- */
+
+  .apron-head {
+    padding-top: var(--space-sm);
+    border-top: 1.5px solid var(--color-text);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-headline);
+    line-height: var(--text-headline--line-height);
+    letter-spacing: -0.03em;
+  }
+
+  /* Label in the first column, content in the rest, like a spec sheet */
+  .apron-split {
+    display: grid;
+    gap: var(--space-xs) var(--space-md);
+  }
+
+  @media (min-width: 48rem) {
+    .apron-split {
+      grid-template-columns: 5fr 7fr;
+    }
+  }
+
+  .apron-rows > li {
+    padding-block: var(--space-sm);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  .apron-rows {
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  /* ---------- Stands ---------- */
+
+  .apron {
+    display: grid;
+    gap: var(--space-2xl) var(--space-lg);
+  }
+
+  @media (min-width: 48rem) {
+    .apron {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .stand {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .stand-art {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .stand-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  /* Black on yellow, like an airport direction sign: this way to the project */
+  .stand-tag {
+    flex: none;
+    padding: 0.375rem 0.4375rem 0.3125rem;
+    border-radius: var(--radius-sm);
+    background: var(--apron-tag);
+    color: var(--apron-tag-ink);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stand-title {
+    font-size: var(--text-2xl);
+    font-weight: 500;
+    letter-spacing: -0.018em;
+  }
+
+  .stand-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  /* The link covers the whole stand */
+  .stand-link::after {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--space-sm));
+    border-radius: var(--radius-lg);
+  }
+
+  .stand-link:focus-visible {
+    outline: none;
+  }
+
+  .stand-link:focus-visible::after {
+    outline: var(--focus-ring-width) solid var(--color-accent);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .stand-arrow {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: none;
+    transition: translate var(--dur-slow) var(--ease);
+  }
+
+  .stand-summary {
+    max-width: 56ch;
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  /* Side by side, summaries of different lengths still start the tables on one line */
+  @media (min-width: 48rem) {
+    .apron .stand-summary {
+      min-height: calc(3lh);
+    }
+  }
+
+  .spec-table {
+    display: grid;
+    grid-template-columns: minmax(6rem, 8rem) minmax(0, 1fr);
+    border-top: var(--border-width) solid var(--color-border);
+    font-size: var(--text-sm);
+  }
+
+  .spec-table > dt,
+  .spec-table > dd {
+    padding-block: 0.5625rem;
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  .spec-table > dt {
+    padding-right: var(--space-md);
+    color: var(--color-muted);
+  }
+
+  .spec-table .metric-before {
+    color: var(--color-muted);
+    text-decoration: line-through;
+  }
+
+  /* ---------- The drawing ---------- */
+
+  .stand-plane [class^='f-'] {
+    stroke-width: 0.6px;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Fills are stroked in their own colour so neighbouring faces leave no seams */
+  .f-fus,
+  .f-belly,
+  .f-wing,
+  .f-hstab,
+  .f-pylon,
+  .f-gear,
+  .f-hub {
+    fill: var(--color-bg);
+    stroke: var(--color-bg);
+  }
+
+  .f-fin,
+  .f-eng,
+  .f-wlet,
+  .f-spinner {
+    fill: var(--apron-livery);
+    stroke: var(--apron-livery);
+  }
+
+  .f-fan,
+  .f-tyre,
+  .f-win,
+  .f-prop {
+    fill: var(--color-text);
+    stroke: var(--color-text);
+  }
+
+  .e-s,
+  .e-c,
+  .e-m,
+  .e-d {
+    fill: none;
+    stroke: var(--color-text);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .e-s {
+    stroke-width: 1.15px;
+  }
+  .e-c {
+    stroke-width: 0.85px;
+  }
+  .e-m {
+    stroke-width: 0.6px;
+  }
+  .e-d {
+    stroke-width: 0.55px;
+  }
+
+  .stand-shadow {
+    fill: var(--apron-shadow);
+  }
+
+  .stand-box {
+    fill: none;
+    stroke: var(--apron-restraint);
+    stroke-width: 1px;
+    stroke-dasharray: 5 5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .stand-marking {
+    fill: none;
+    stroke: var(--apron-marking);
+    stroke-width: 2px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .stand-number {
+    fill: var(--apron-marking);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .stand-pool-stop {
+    stop-color: var(--apron-pool);
+  }
+
+  .stand-beacon-stop,
+  .stand-beacon {
+    stop-color: var(--apron-beacon);
+    fill: var(--apron-beacon);
+  }
+
+  /* ---------- Light: off, on while hovered or focused, always on in the case-study header ---------- */
+
+  .stand-marking,
+  .stand-number {
+    opacity: 0.55;
+  }
+
+  .stand-pool,
+  .stand-beacon,
+  .stand-beacon-glow {
+    opacity: 0;
+  }
+
+  /* The light comes up quickly and settles back slowly */
+  .stand-pool,
+  .stand-beacon,
+  .stand-beacon-glow,
+  .stand-marking,
+  .stand-number,
+  .stand-box {
+    transition:
+      opacity var(--dur-slow) var(--ease),
+      stroke var(--dur-slow) var(--ease);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .stand:hover :is(.stand-pool, .stand-beacon, .stand-beacon-glow, .stand-marking, .stand-number) {
+      opacity: 1;
+      transition-duration: var(--dur-base);
+    }
+
+    .stand:hover .stand-box {
+      stroke: var(--color-muted);
+      stroke-dasharray: none;
+      transition-duration: var(--dur-base);
+    }
+
+    .stand:hover .stand-arrow {
+      translate: 2px -2px;
+      transition-duration: var(--dur-base);
+    }
+
+    .stand:hover .stand-title {
+      text-decoration: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 5px;
+    }
+  }
+
+  .stand:has(.stand-link:focus-visible) :is(.stand-pool, .stand-beacon, .stand-beacon-glow, .stand-marking, .stand-number),
+  .stand-lit :is(.stand-pool, .stand-beacon, .stand-beacon-glow, .stand-marking, .stand-number) {
+    opacity: 1;
+    transition-duration: var(--dur-base);
+  }
+
+  /* ---------- Case-study header: the stand the reader came from, lit, beside its spec ---------- */
+
+  .case-head {
+    display: grid;
+    gap: var(--space-lg);
+    align-items: end;
+  }
+
+  .case-spec {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .case-spec .spec-table {
+    align-self: stretch;
+  }
+
+  .case-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: calc(var(--text-headline) * 1.25);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  @media (min-width: 48rem) {
+    .case-head {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-md);
+    }
+
+    .case-spec {
+      grid-column: 1 / span 5;
+      grid-row: 1;
+    }
+
+    .case-figure {
+      grid-column: 6 / span 7;
+      grid-row: 1;
+    }
+  }
+}

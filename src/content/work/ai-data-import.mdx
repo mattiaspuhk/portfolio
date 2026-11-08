@@ -1,37 +1,88 @@
 ---
-title: 'TODO(mattias)'
-summary: 'TODO(mattias)'
+title: 'AI data import'
+summary: 'An import that reads spreadsheets, vCards and business-card photos, asks a couple of questions, and saves nothing until the user approves it.'
+tldr: 'Customers came to GAIA with contacts in spreadsheets and photos of business cards. I built an import where an agent reads the file, asks a couple of multiple-choice questions and stages everything for review. Nothing is saved until the user approves it. When an 819-row import locked an organisation out, the model was fine. The commit was the problem, and I cut it from 1,600 statements to 2.'
 order: 1
 org: 'RingIT · GAIA'
-role: 'TODO(mattias)'
+role: 'Designed and built it end to end' # TODO(mattias): confirm solo, or name the parts a teammate owned
 period:
-  start: 2026-01-01 # TODO(mattias): placeholder date
-stack: [] # TODO(mattias)
-metrics: [] # TODO(mattias): only numbers you've cleared
+  start: 2026-06-10
+  end: 2026-08-28
+stack: ['NestJS', 'React', 'TypeScript', 'Vertex AI (Gemini)', 'Vercel AI SDK', 'Pub/Sub', 'Langfuse']
+metrics:
+  - label: 'Statements per 40-row commit'
+    before: '80'
+    after: '2'
+  # TODO(mattias): add the usage number (imports run or rows imported) once you've pulled it
 disclosure: mock-data
 draft: true
+aircraft: wide
 ---
 
 ## Problem
 
-{/* TODO(mattias) */}
+GAIA is only useful once your partners and contacts are in it. New customers didn't have them anywhere we could connect to. They had spreadsheets, exports from old CRMs with their own column names, and a stack of business cards from the last trade fair. The only way in was typing them up by hand.
+
+The standard fix is a column-mapping wizard. It's the screen every CRM has, where you match "Acct Name" to "Company" one dropdown at a time. It's also the step people give up on, and it does nothing for a photo of four business cards.
+
+{/* TODO(mattias): Figure, mock. A messy export (odd headers, merged columns) next to the fields GAIA needs.
+    Caption idea: "What a real export looks like next to what GAIA expects." */}
 
 ## Constraints
 
-{/* TODO(mattias) */}
+- Nothing touches live data until the user says so. A wrong guess in someone's contact book is worse than a slow import.
+- AI cost can't grow with the file. A 5,000-row sheet must not mean 5,000 model calls.
+- Every imported record traces back to its row, or its card, in the source file.
+- Data stays in an EU region, and the cost of each import is visible per organisation.
 
 ## Approach
 
-{/* TODO(mattias) */}
+You drop a file into the import window. It can be a CSV, an Excel file, a vCard, a PDF, or a photo taken on your phone.
+
+A plain parser reads it first, with no AI involved. It detects the delimiter and encoding, numbers every row and stops at the row cap before anything is spent. Then a planning agent looks at the columns and a sample of rows. If something is unclear it asks, but only with quick-reply options, and only a few times. Then it runs.
+
+For spreadsheets the model writes the mapping once and normal code applies it to every row. Model cost depends on the columns, not the number of rows. Photos and PDFs go through a separate vision path. A background worker does the job and streams progress to the screen.
+
+Everything lands in a staging area, not in GAIA. The review screen shows what's new, what looks like a duplicate and what needs attention. The user decides, and only then does anything get saved.
+
+I split the build into 12 PR-sized pieces, each with a written handoff, and built each one in a single Claude Code session.
+
+{/* TODO(mattias): Figure, mock. The flow: upload → plan → run → review → commit, with the two human steps marked.
+    Caption idea: "The user steps in twice. Once to answer questions, once to approve." */}
+
+{/* TODO(mattias): Figure, mock. The clarifying question card with quick-reply options.
+    Caption idea: "The agent asks with options, never an open text box." */}
 
 ## Decisions
 
-{/* TODO(mattias) */}
+<Decision title="An agent instead of a mapping wizard" options={["Column-mapping wizard", "AI import with staged review"]} chose="AI import with staged review">
+A wizard is predictable and costs nothing to run. But it only handles spreadsheets, and it leaves the hardest part to the user. The agent handles cards and PDFs too, and turns mapping into a couple of multiple-choice questions. The price is a model in the loop, which is why the next two decisions exist.
+</Decision>
+
+<Decision title="The model maps once, code does the rows" options={["Send every row to the model", "Model writes the mapping, code applies it"]} chose="Model writes the mapping, code applies it">
+Sending rows to the model is simpler to build and copes better with odd rows. But the cost grows with the file, and nobody can explain afterwards why row 3,412 came out different. A mapping can be read, tested and run again.
+</Decision>
+
+<Decision title="Duplicates are flagged, never merged" options={["Let the model merge duplicates", "Rule-based matching, the user decides"]} chose="Rule-based matching, the user decides">
+Auto-merging would save clicks. A wrong merge quietly destroys a contact someone cared about. So matching is plain rules, the review screen shows each match, and the user picks.
+</Decision>
 
 ## When it broke
 
-{/* TODO(mattias) */}
+I shipped it behind a flag, first to our own organisation and then to a few customer testers. The first round of feedback was about real life, not AI. iPhone photos arrived as HEIC. Images saved from WhatsApp were .jpeg, not .jpg. And a photo of four business cards gave all four people the same company. I fixed that one with a prompt rule.
+
+In August the worst report came in. Imports felt slow, the second one froze, and then nobody in that organisation could import anything. I went through the trace for that session. There were three bugs, and the model caused none of them.
+
+- The model had read all four cards correctly. The commit lost it. Every card in one photo shared a single row reference, so the last company written won. The review screen read the same lookup, so the preview agreed with the wrong answer. My prompt rule from July could never have helped.
+- The "slowness" was the progress counter sitting at 0 for 21 seconds. Progress was only saved at the end of a batch, and one photo is one batch. Now it updates for each contact.
+- The real blocker was an 819-row commit. It made two database round-trips per record inside one transaction, more than 1,600 statements holding one of ten pool connections for minutes. It failed, rolled back and left the session stuck in review. A stuck session blocks every new import for the organisation.
+
+I rewrote the commit as two batched statements that check the mapping explicitly, and made stuck sessions possible to discard or recover. On 28 August the flag came off and every organisation got the import.
+
+<Metric label="Statements per 40-row commit" before="80" after="2" />
 
 ## Next
 
-{/* TODO(mattias) */}
+There is no bulk undo yet. If someone imports 800 wrong contacts, they delete them one by one. That's the first thing I'd build next. After that I'd log how often users override the planner's guesses, to learn which questions it can stop asking.
+
+Since then, when an AI feature gets something wrong, I read what happens after the model returns before I touch the prompt.

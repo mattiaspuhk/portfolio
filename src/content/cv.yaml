@@ -1,29 +1,94 @@
-# CV entries for /cv. One example per section; copy an entry to add more.
+# CV entries for /cv, from the October 2026 CV. Copy an entry to add more.
 # `start` and `end` are "YYYY-MM"; leave `end` out for "present". `order` sorts within a section.
 
-- id: experience-example
+- id: experience-ringit
   section: experience
-  title: 'TODO(mattias)'
-  org: 'TODO(mattias)'
-  location: 'TODO(mattias)'
-  start: 'TODO(mattias)'
+  title: 'Full-Stack Software Engineer (Project: GAIA Global)'
+  org: 'RingIT OÜ (International Tech Consultancy)'
+  location: 'Tallinn, Estonia'
+  start: '2024-12'
+  end: '2026-09'
   bullets:
-    - 'TODO(mattias)'
+    - "Shipped GAIA's AI data import end to end: file parser, planning agent, background mapping with live progress and a record-by-record review step. One of the platform's most used AI features"
+    - "Built the Intelligence Center, an AI analyst over each customer's own data (Vertex AI, Vercel AI SDK, Langfuse); cut time to first answer from 27.3 s to 12.9 s and cost per answer by 12%, with no write access for the model"
+    - "Replaced the Intelligence Center's five hand-built AI tools with one guarded, read-only SQL tool over each organisation's data snapshot, which cut code and made the agent more capable"
+    - 'Drove the platform rebuild as its top contributor (a third of 7,300+ commits): unified the legacy company models into one identity, moved email processing to Google Cloud Tasks, built the shared React UI library'
   order: 1
 
-- id: education-example
+- id: experience-playerbank
+  section: experience
+  title: 'Frontend Developer (Internship)'
+  org: 'Playerbank OÜ'
+  location: 'Tallinn, Estonia'
+  start: '2024-02'
+  end: '2024-08'
+  bullets:
+    - 'Developed frontend pages from Figma designs that shipped in the product'
+    - 'Delivered features in two-week sprints, using Jira and Bitbucket'
+    - 'Made the interfaces responsive across screen sizes, turning Figma designs into modular code'
+    - 'Created reusable UI components that cut development time for new features by ~30%'
+  order: 2
+
+- id: experience-ulo
+  section: experience
+  title: 'Waiter and Bartender (Part-time)'
+  org: 'Ülo OÜ'
+  location: 'Tallinn, Estonia'
+  start: '2021-09'
+  end: '2023-08'
+  bullets:
+    - "Made the restaurant's social media content, which raised engagement by 20%"
+    - 'Ran seating for 80+ covers a day'
+    - 'Helped with bookkeeping and stock counts for financial reporting'
+    - 'Trained 3 new waiting and bar staff on service and the till system'
+  order: 3
+
+- id: education-lse
   section: education
-  title: 'TODO(mattias)'
-  org: 'TODO(mattias)'
-  location: 'TODO(mattias)'
-  start: 'TODO(mattias)'
-  end: 'TODO(mattias)'
-  bullets: []
+  title: 'MSc Management of Information Systems and Digital Innovation'
+  org: 'London School of Economics and Political Science (LSE)'
+  location: 'London, UK'
+  start: '2026-09'
+  end: '2027-09'
+  bullets:
+    - 'Modules include Management and Socioeconomics of Digital Innovation, Innovating Organisational IT and Research Design for Studies in Digital Innovation'
   order: 1
 
-- id: skills-example
-  section: skills
-  title: 'TODO(mattias)'
+- id: education-taltech
+  section: education
+  title: 'BSc Business Information Technology'
+  org: 'Tallinn University of Technology'
+  location: 'Tallinn, Estonia'
+  start: '2023-09'
+  end: '2026-06'
   bullets:
-    - 'TODO(mattias)'
+    - 'GPA 4.30/5.0; thesis graded 5/5'
+    - "Thesis: Compared retrieval-augmented generation (RAG) approaches for a B2B SaaS platform using a custom evaluation harness; the findings informed the platform's AI rebuild"
+  order: 2
+
+- id: education-tum
+  section: education
+  title: 'Exchange semester (Erasmus)'
+  org: 'Technical University of Munich'
+  location: 'Munich, Germany'
+  start: '2025-10'
+  end: '2026-03'
+  bullets:
+    - "Master's-level modules in Data Structure Engineering and Network Security"
+  order: 3
+
+- id: skills-technical
+  section: skills
+  title: 'Technical skills'
+  bullets:
+    - 'Languages & frameworks: TypeScript, JavaScript, React, Node.js, NestJS, PostgreSQL (Prisma), C#, Rust'
+    - 'Cloud & tools: Google Cloud (Cloud Tasks, Pub/Sub, Cloud Storage), Git, Docker, Sentry, Figma'
+    - 'AI: LLM agents, Vertex AI (Gemini), Vercel AI SDK, Langfuse tracing and evaluation, RAG, Claude Code'
   order: 1
+
+- id: skills-languages
+  section: skills
+  title: 'Languages'
+  bullets:
+    - 'Estonian (Native), English (C2), Italian (Conversational), French (Conversational), Russian (Conversational)'
+  order: 2

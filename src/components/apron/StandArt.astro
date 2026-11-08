@@ -1,0 +1,48 @@
+---
+// A project's stand: its plane (drawn at build time by src/lib/apron/planes.ts), the stand's
+// markings and painted number, its floodlight and the plane's beacon. Colours and the light come
+// from apron.css. Decorative: the stand's title and spec table carry the information.
+import { drawAircraft, standViewBox, type Aircraft } from '@/lib/apron/planes';
+
+interface Props {
+  aircraft: Aircraft;
+  /** Stand number, e.g. "01". Unique on the page, since it also names the gradients. */
+  number: string;
+}
+
+const { aircraft, number } = Astro.props;
+const { body, ground, beacon } = drawAircraft(aircraft);
+const pool = `stand-pool-${number}`;
+const glow = `stand-glow-${number}`;
+---
+
+<svg class="stand-art" viewBox={standViewBox()} aria-hidden="true">
+  <defs>
+    <radialGradient id={pool}>
+      <stop offset="0" class="stand-pool-stop" stop-opacity="0.5"></stop>
+      <stop offset="0.55" class="stand-pool-stop" stop-opacity="0.16"></stop>
+      <stop offset="1" class="stand-pool-stop" stop-opacity="0"></stop>
+    </radialGradient>
+    <radialGradient id={glow}>
+      <stop offset="0" class="stand-beacon-stop" stop-opacity="0.55"></stop>
+      <stop offset="1" class="stand-beacon-stop" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+  <g>
+    <circle class="stand-pool" r={ground.poolR} transform={`matrix(${ground.poolMatrix})`} fill={`url(#${pool})`}></circle>
+    <path class="stand-shadow" d={ground.shadow}></path>
+    <path class="stand-box" d={ground.box}></path>
+    <path class="stand-marking" d={ground.leadIn}></path>
+    <path class="stand-marking" d={ground.stopBar}></path>
+    <text
+      class="stand-number"
+      transform={`matrix(${ground.numberMatrix})`}
+      font-size={ground.numberSize}
+      text-anchor="middle"
+      dominant-baseline="central">{number}</text
+    >
+  </g>
+  <g class="stand-plane" set:html={body} />
+  <circle class="stand-beacon-glow" cx={beacon.x} cy={beacon.y} r="16" fill={`url(#${glow})`}></circle>
+  <circle class="stand-beacon" cx={beacon.x} cy={beacon.y} r="3.5"></circle>
+</svg>

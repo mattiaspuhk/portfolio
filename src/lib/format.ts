@@ -1,5 +1,4 @@
 // Content dates are calendar dates parsed as UTC midnight, so format in UTC to avoid off-by-one days.
-// TODO(mattias): date styles.
 const dateFormat = new Intl.DateTimeFormat('en', {
   year: 'numeric',
   month: 'short',
@@ -12,10 +11,19 @@ const monthYearFormat = new Intl.DateTimeFormat('en', {
   timeZone: 'UTC',
 });
 
+/** A project's stand on the apron, from its `order`: 1 → "01". */
+export const standNumber = (order: number) => String(order).padStart(2, '0');
+
 /** For `<time datetime>`. */
 export const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 
-export const formatDate = (date: Date) => dateFormat.format(date);
+/** Day first, to match the British spelling in the copy: "20 Sep 2026". The en-GB locale writes "Sept". */
+export function formatDate(date: Date) {
+  const parts = Object.fromEntries(
+    dateFormat.formatToParts(date).map(({ type, value }) => [type, value]),
+  );
+  return `${parts.day} ${parts.month} ${parts.year}`;
+}
 
 export const formatMonthYear = (date: Date) => monthYearFormat.format(date);
 

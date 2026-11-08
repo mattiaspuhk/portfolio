@@ -1,13 +1,20 @@
 ---
+// The case-study header, laid out like an aircraft spec sheet: the title and spec table on the
+// left, the project's stand on the right with its light on. The stand and title share
+// view-transition names with the home page, so the plane the reader clicked moves in here.
 import type { CollectionEntry } from 'astro:content';
+import StandArt from '@/components/apron/StandArt.astro';
 import { site } from '@/config/site';
-import { formatPeriod } from '@/lib/format';
-import MetricList from './MetricList.astro';
+import { formatPeriod, standNumber } from '@/lib/format';
+import MetricFigure from './MetricFigure.astro';
 
 type Work = CollectionEntry<'work'>['data'];
 
 interface Props {
   title: Work['title'];
+  summary: Work['summary'];
+  order: Work['order'];
+  aircraft: Work['aircraft'];
   org: Work['org'];
   role: Work['role'];
   period: Work['period'];
@@ -17,42 +24,62 @@ interface Props {
   tldr?: Work['tldr'];
 }
 
-const { title, org, role, period, stack, metrics, minutesRead, tldr } = Astro.props;
+const { title, summary, order, aircraft, org, role, period, stack, metrics, minutesRead, tldr } = Astro.props;
 const { summary: labels } = site.labels;
+const number = standNumber(order);
 ---
 
-<header class="flex flex-col gap-(--space-md)">
-  <h1 class="text-3xl">{title}</h1>
-  <dl class="grid grid-cols-[auto_1fr] gap-x-(--space-md) gap-y-(--space-xs) text-sm">
-    <dt class="text-muted">{labels.org}</dt>
-    <dd>{org}</dd>
-    <dt class="text-muted">{labels.role}</dt>
-    <dd>{role}</dd>
-    <dt class="text-muted">{labels.period}</dt>
-    <dd>{formatPeriod(period, site.labels.present)}</dd>
-    {
-      stack.length > 0 && (
-        <>
-          <dt class="text-muted">{labels.stack}</dt>
-          <dd>
-            <ul class="flex flex-wrap gap-x-(--space-sm)">
-              {stack.map((item) => (
-                <li>{item}</li>
-              ))}
-            </ul>
-          </dd>
-        </>
-      )
-    }
-    <dt class="text-muted">{labels.readTime}</dt>
-    <dd>{site.labels.readTime(minutesRead)}</dd>
-  </dl>
-  <MetricList metrics={metrics} />
+<header class="flex flex-col gap-(--space-2xl)">
+  <div class="case-head">
+    <div class="case-spec">
+      <span class="stand-tag">{number}</span>
+      <h1 class="case-title" style={`view-transition-name: stand-${number}-title`}>{title}</h1>
+      <p class="stand-summary">{summary}</p>
+      <dl class="spec-table">
+        <dt>{labels.org}</dt>
+        <dd>{org}</dd>
+        <dt>{labels.role}</dt>
+        <dd>{role}</dd>
+        <dt>{labels.period}</dt>
+        <dd>{formatPeriod(period, site.labels.present)}</dd>
+        {
+          stack.length > 0 && (
+            <>
+              <dt>{labels.stack}</dt>
+              <dd>
+                <ul class="flex flex-wrap gap-x-(--space-sm)">
+                  {stack.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </dd>
+            </>
+          )
+        }
+        <dt>{labels.readTime}</dt>
+        <dd>{site.labels.readTime(minutesRead)}</dd>
+        {
+          metrics.map((metric) => (
+            <>
+              <dt>{metric.label}</dt>
+              <dd>
+                <MetricFigure before={metric.before} after={metric.after} />
+                {metric.note && <span class="block text-muted">{metric.note}</span>}
+              </dd>
+            </>
+          ))
+        }
+      </dl>
+    </div>
+    <div class="case-figure stand-lit" style={`view-transition-name: stand-${number}`}>
+      <StandArt aircraft={aircraft} number={number} />
+    </div>
+  </div>
   {
     tldr && (
-      <div>
+      <div class="apron-split border-t-[1.5px] border-text pt-(--space-sm)">
         <p class="text-sm text-muted">{labels.tldr}</p>
-        <p>{tldr}</p>
+        <p class="max-w-[46ch] text-xl leading-normal">{tldr}</p>
       </div>
     )
   }

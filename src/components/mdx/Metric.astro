@@ -1,5 +1,5 @@
 ---
-import { site } from '@/config/site';
+import MetricFigure from '@/components/work/MetricFigure.astro';
 
 interface Props {
   label: string;
@@ -9,21 +9,12 @@ interface Props {
 }
 
 const { label, before, after, note } = Astro.props;
-const { metric: labels } = site.labels;
+// Spaced with gaps, not whitespace: Astro drops the line breaks between these spans. The figure is
+// a row of its own, so a long label never strands "2" from "80 →".
 ---
 
-<span class="metric">
+<span class="metric inline-flex flex-wrap items-baseline gap-x-(--space-xs)">
   <span class="text-muted">{label}</span>
-  {
-    before && (
-      <>
-        <span class="sr-only">{labels.before}</span>
-        <span>{before}</span>
-        <span aria-hidden="true">→</span>
-      </>
-    )
-  }
-  <span class="sr-only">{labels.after}</span>
-  <strong>{after}</strong>
+  <MetricFigure before={before} after={after} />
   {note && <span class="text-sm text-muted">{note}</span>}
 </span>

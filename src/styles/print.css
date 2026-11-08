@@ -26,4 +26,11 @@
     background: white !important;
     color: black !important;
   }
+
+  /* No storm or halation on paper */
+  .radar,
+  .halo::before,
+  .halo::after {
+    display: none;
+  }
 }

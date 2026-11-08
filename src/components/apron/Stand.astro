@@ -1,0 +1,64 @@
+---
+// A project on the home page apron: its stand drawing, then a spec table in the manner of an
+// aircraft spec sheet. The title link covers the whole stand. The drawing and title share
+// view-transition names with the case-study header, so the plane moves into it on navigation.
+import type { CollectionEntry } from 'astro:content';
+import Arrow from '@/components/site/Arrow.astro';
+import MetricFigure from '@/components/work/MetricFigure.astro';
+import { site } from '@/config/site';
+import { formatPeriod, standNumber } from '@/lib/format';
+import StandArt from './StandArt.astro';
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+  /** Heading level of the title, to fit the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { entry, headingLevel = 3 } = Astro.props;
+const { title, summary, org, role, period, stack, metrics, order, aircraft } = entry.data;
+const Heading = `h${headingLevel}` as const;
+const number = standNumber(order);
+const metric = metrics[0];
+const labels = site.labels.summary;
+const shortStack = stack.length > 3 ? `${stack.slice(0, 3).join(', ')} +${stack.length - 3}` : stack.join(', ');
+---
+
+<article class="stand">
+  <div class="stand-figure" style={`view-transition-name: stand-${number}`}>
+    <StandArt aircraft={aircraft} number={number} />
+  </div>
+  <div class="stand-head">
+    <span class="stand-tag">{number}</span>
+    <Heading class="stand-title" style={`view-transition-name: stand-${number}-title`}>
+      <a class="stand-link" href={`/work/${entry.id}`}>{title}<Arrow direction="up-right" class="stand-arrow" /></a>
+    </Heading>
+  </div>
+  <p class="stand-summary">{summary}</p>
+  <dl class="spec-table">
+    <dt>{labels.org}</dt>
+    <dd>{org}</dd>
+    <dt>{labels.role}</dt>
+    <dd>{role}</dd>
+    <dt>{labels.period}</dt>
+    <dd>{formatPeriod(period, site.labels.present)}</dd>
+    {
+      shortStack && (
+        <>
+          <dt>{labels.stack}</dt>
+          <dd>{shortStack}</dd>
+        </>
+      )
+    }
+    {
+      metric && (
+        <>
+          <dt>{metric.label}</dt>
+          <dd>
+            <MetricFigure before={metric.before} after={metric.after} />
+          </dd>
+        </>
+      )
+    }
+  </dl>
+</article>

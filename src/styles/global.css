@@ -1,7 +1,9 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './prose.css';
-@import './canvas.css';
+@import './apron.css';
+@import './terminal.css';
+@import './dock.css';
 @import './print.css';
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
@@ -9,6 +11,11 @@
   html {
     background-color: var(--color-bg);
     color: var(--color-text);
+  }
+
+  /* Full-bleed pieces like the radar band never cause a sideways scroll */
+  body {
+    overflow-x: clip;
   }
 
   :focus-visible {
@@ -20,6 +27,25 @@
   html:not([data-theme]) .theme-toggle {
     display: none;
   }
+}
+
+/*
+ * Cross-document view transitions, no JS. Pages cross-fade, and elements that share a
+ * view-transition-name move between pages: a stand's drawing and title on the home page become
+ * the case-study header. Durations are motion tokens, so reduced motion turns this off.
+ */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(*) {
+  animation-duration: var(--dur-slow);
+  animation-timing-function: cubic-bezier(0.2, 0.75, 0.15, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-base);
 }
 
 @media (prefers-reduced-motion: reduce) {

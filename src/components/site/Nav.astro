@@ -20,15 +20,12 @@ const isCurrent = (href: string) => current === href || current.startsWith(`${hr
 
 {
   items.length > 0 && (
-    <nav aria-label={label}>
-      <ul class="flex flex-wrap gap-x-(--space-sm) gap-y-(--space-xs)">
+    <nav aria-label={label} class="dock-glass dock-nav">
+      <ul class="dock-list">
         {items.map((item) => (
           <li>
-            <a
-              href={item.href}
-              aria-current={isCurrent(item.href) ? 'page' : undefined}
-              class="text-muted hover:text-text aria-[current=page]:text-text"
-            >
+            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined} class="dock-link">
+              {isCurrent(item.href) && <span class="dock-lens" aria-hidden="true" />}
               {item.label}
             </a>
           </li>

@@ -34,6 +34,11 @@
   --text-2xl--line-height: var(--leading-tight);
   --text-3xl: 2rem; /* TODO(mattias) */
   --text-3xl--line-height: var(--leading-tight);
+  /* Display sizes, in the display face: section heads and case-study titles, then the home headline */
+  --text-headline: clamp(2.125rem, 1.4rem + 2.6vw, 3rem);
+  --text-headline--line-height: 1;
+  --text-display: clamp(2.625rem, 0.875rem + 7.2vw, 5.625rem);
+  --text-display--line-height: 0.98;
 
   /* Line heights */
   --leading-*: initial;
@@ -45,6 +50,7 @@
   --radius-*: initial;
   --radius-sm: 0.25rem; /* TODO(mattias) */
   --radius-md: 0.5rem; /* TODO(mattias) */
+  --radius-lg: 1rem; /* TODO(mattias) */
 
   /* Base unit for Tailwind's numeric spacing utilities (p-4 = 4 × this) */
   --spacing: 0.25rem; /* TODO(mattias) */
@@ -54,10 +60,12 @@
   --default-transition-timing-function: var(--ease);
 }
 
-/* The Fonts API (see astro.config.mjs) defines --font-body and --font-code. */
+/* The Fonts API (see astro.config.mjs) defines --font-body and --font-code. The display sizes use
+   the body face, Inter, whose optical-size axis switches to its display cut at large sizes. */
 @theme inline {
   --font-sans: var(--font-body);
   --font-mono: var(--font-code);
+  --font-display: var(--font-body);
 }
 
 :root {
@@ -85,9 +93,23 @@
   --ease: ease-out; /* TODO(mattias) */
   --dur-fast: 120ms; /* TODO(mattias) */
   --dur-base: 200ms; /* TODO(mattias) */
+  --dur-slow: 600ms; /* TODO(mattias) */
 
-  /* The bento's edge light, which the page canvas's dots catch too. */
+  /*
+   * Bento glow, behind the home page work tiles: a field lit by three soft lights, a hairline
+   * that catches them (rim → rim-end), a sheen on each tile's top edge, and how much page
+   * colour each tile lays over the field (pane).
+   */
+  --glow-field: #f2f5fb; /* TODO(mattias) */
+  --glow-light-1: #c9d6fb; /* TODO(mattias) */
+  --glow-light-2: #c9eef0; /* TODO(mattias) */
+  --glow-light-3: #e1d8fb; /* TODO(mattias) */
   --glow-edge: #8eaaf7; /* TODO(mattias) */
+  --glow-rim: color-mix(in oklab, var(--glow-edge) 55%, var(--color-bg)); /* TODO(mattias) */
+  --glow-rim-end: color-mix(in oklab, var(--glow-edge) 18%, var(--color-bg)); /* TODO(mattias) */
+  --glow-sheen: rgb(255 255 255 / 0.85); /* TODO(mattias) */
+  --glow-veil: var(--color-bg); /* the colour each tile lays over the field */
+  --glow-pane: 44%; /* TODO(mattias) */
 
   /*
    * Page canvas (canvas.css): a dot grid behind every page. The dots catch a light in the
@@ -99,6 +121,60 @@
   --dots-light: var(--glow-edge); /* TODO(mattias) */
   --dots-light-reach: 65% 55%; /* TODO(mattias) */
   --dots-quiet: 45%; /* TODO(mattias) */
+
+  /*
+   * Apron (apron.css): the home page stands, the case-study header and the radar band.
+   * Aircraft are drawn in the page colours plus a livery; stands carry yellow markings that light
+   * up with the stand's floodlight (pool) and the aircraft's beacon on hover.
+   */
+  --apron-livery: #ff5b14; /* fin, engines, winglets */
+  --apron-marking: #d9a700; /* lead-in line, stop bar, painted stand number */
+  --apron-restraint: color-mix(in oklab, var(--color-text) 22%, var(--color-bg)); /* the stand's dashed boundary */
+  --apron-pool: #ffb27a; /* floodlight */
+  --apron-beacon: #ff2d0a;
+  --apron-shadow: rgb(0 0 0 / 0.06);
+  --apron-tag: #f5c518; /* stand tags, black on yellow like airport direction signs */
+  --apron-tag-ink: #141210;
+  /* Halation on the headline's last words: dark ink with a soft bloom */
+  --halo: #ff4a0a;
+  --halo-ink: #5a1902;
+  /*
+   * Radar band: one orange ramp, weakest to strongest return, then the glints at the top. The
+   * pointer warms cells up it. Light climbs to deeper ember; dark climbs to white-hot amber.
+   */
+  --radar-1: #f8c69b;
+  --radar-2: #faa15e;
+  --radar-3: #f67621;
+  --radar-4: #e35003;
+  --radar-5: #aa2d00;
+
+  /*
+   * Dock (dock.css): the nav in a glass pill at the bottom of the window, the theme toggle in a
+   * glass button beside it. The glass is a thin tint of the page over a blurred, saturated view of
+   * what passes behind. Its rim catches the light at the top left (rim), fades along the sides
+   * (rim-faint) and catches it again at the bottom right (rim-low); light gathers inside its edges
+   * (glow) and falls on it from above (sheen). The page you're on sits under a lens: a faint ink
+   * tint in the light theme, brighter glass in the dark.
+   * Labels are ink, a touch softer than text, so they still read over the orange band.
+   */
+  --dock-tint: color-mix(in oklab, var(--color-bg) 40%, transparent);
+  --dock-tint-solid: color-mix(in oklab, var(--color-bg) 94%, transparent); /* no blur available */
+  --dock-blur: 16px;
+  --dock-saturate: 2;
+  --dock-rim: rgb(255 255 255 / 0.95);
+  --dock-rim-faint: rgb(255 255 255 / 0.2);
+  --dock-rim-low: rgb(255 255 255 / 0.6);
+  --dock-edge: rgb(0 0 0 / 0.07);
+  --dock-glow: rgb(255 255 255 / 0.5);
+  --dock-sheen: rgb(255 255 255 / 0.4);
+  --dock-shadow: 0 12px 32px -10px rgb(0 0 0 / 0.3), 0 2px 6px rgb(0 0 0 / 0.06);
+  --dock-lens: rgb(0 0 0 / 0.07);
+  --dock-lens-shadow: 0 0 0 transparent;
+  --dock-hover: rgb(0 0 0 / 0.035);
+  --dock-ink: color-mix(in oklab, var(--color-text) 78%, var(--color-bg));
+  --dock-inset: 0.25rem; /* between the pill's edge and the lens */
+  --dock-offset: 1rem; /* between the dock and the window's bottom edge */
+  --dock-clearance: 5rem; /* room under the footer, so the dock never covers the page's end */
 }
 
 /* Dark theme. Keep these two blocks identical. */
@@ -111,9 +187,40 @@
   --color-border: #3a3a3a; /* TODO(mattias) */
   --color-accent: #9e9eff; /* TODO(mattias) */
   --color-accent-contrast: #000000; /* TODO(mattias) */
+  --glow-field: #151922; /* TODO(mattias) */
+  --glow-light-1: #22366c; /* TODO(mattias) */
+  --glow-light-2: #16404a; /* TODO(mattias) */
+  --glow-light-3: #2d2758; /* TODO(mattias) */
   --glow-edge: #5378f2; /* TODO(mattias) */
+  --glow-rim: color-mix(in oklab, var(--glow-edge) 70%, transparent); /* TODO(mattias) */
+  --glow-rim-end: color-mix(in oklab, var(--glow-edge) 20%, transparent); /* TODO(mattias) */
+  --glow-sheen: rgb(255 255 255 / 0.08); /* TODO(mattias) */
+  --glow-pane: 40%; /* TODO(mattias) */
   --dots-color: color-mix(in oklab, var(--color-text) 14%, var(--color-bg)); /* TODO(mattias) */
   --dots-light: color-mix(in oklab, var(--glow-edge) 70%, var(--color-bg)); /* TODO(mattias) */
+  --apron-livery: #ff6a26;
+  --apron-marking: #f5c518;
+  --apron-pool: #ff7a2e;
+  --apron-shadow: rgb(0 0 0 / 0.5);
+  --halo: #ff5b14;
+  --halo-ink: #ffd9c6;
+  --radar-1: #532718;
+  --radar-2: #8d3c16;
+  --radar-3: #d55d05;
+  --radar-4: #fb8e31;
+  --radar-5: #fed29c;
+  --dock-tint: color-mix(in oklab, var(--color-surface) 45%, transparent);
+  --dock-tint-solid: color-mix(in oklab, var(--color-surface) 94%, transparent);
+  --dock-rim: rgb(255 255 255 / 0.32);
+  --dock-rim-faint: rgb(255 255 255 / 0.05);
+  --dock-rim-low: rgb(255 255 255 / 0.14);
+  --dock-edge: rgb(255 255 255 / 0.06);
+  --dock-glow: rgb(255 255 255 / 0.05);
+  --dock-sheen: rgb(255 255 255 / 0.07);
+  --dock-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.75), 0 2px 6px rgb(0 0 0 / 0.4);
+  --dock-lens: rgb(255 255 255 / 0.14);
+  --dock-lens-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+  --dock-hover: rgb(255 255 255 / 0.07);
 }
 
 /* No-JS fallback: the theme-init script never ran, so follow the system setting. */
@@ -127,9 +234,40 @@
     --color-border: #3a3a3a; /* TODO(mattias) */
     --color-accent: #9e9eff; /* TODO(mattias) */
     --color-accent-contrast: #000000; /* TODO(mattias) */
+    --glow-field: #151922; /* TODO(mattias) */
+    --glow-light-1: #22366c; /* TODO(mattias) */
+    --glow-light-2: #16404a; /* TODO(mattias) */
+    --glow-light-3: #2d2758; /* TODO(mattias) */
     --glow-edge: #5378f2; /* TODO(mattias) */
+    --glow-rim: color-mix(in oklab, var(--glow-edge) 70%, transparent); /* TODO(mattias) */
+    --glow-rim-end: color-mix(in oklab, var(--glow-edge) 20%, transparent); /* TODO(mattias) */
+    --glow-sheen: rgb(255 255 255 / 0.08); /* TODO(mattias) */
+    --glow-pane: 40%; /* TODO(mattias) */
     --dots-color: color-mix(in oklab, var(--color-text) 14%, var(--color-bg)); /* TODO(mattias) */
     --dots-light: color-mix(in oklab, var(--glow-edge) 70%, var(--color-bg)); /* TODO(mattias) */
+    --apron-livery: #ff6a26;
+    --apron-marking: #f5c518;
+    --apron-pool: #ff7a2e;
+    --apron-shadow: rgb(0 0 0 / 0.5);
+    --halo: #ff5b14;
+    --halo-ink: #ffd9c6;
+    --radar-1: #532718;
+    --radar-2: #8d3c16;
+    --radar-3: #d55d05;
+    --radar-4: #fb8e31;
+    --radar-5: #fed29c;
+    --dock-tint: color-mix(in oklab, var(--color-surface) 45%, transparent);
+    --dock-tint-solid: color-mix(in oklab, var(--color-surface) 94%, transparent);
+    --dock-rim: rgb(255 255 255 / 0.32);
+    --dock-rim-faint: rgb(255 255 255 / 0.05);
+    --dock-rim-low: rgb(255 255 255 / 0.14);
+    --dock-edge: rgb(255 255 255 / 0.06);
+    --dock-glow: rgb(255 255 255 / 0.05);
+    --dock-sheen: rgb(255 255 255 / 0.07);
+    --dock-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.75), 0 2px 6px rgb(0 0 0 / 0.4);
+    --dock-lens: rgb(255 255 255 / 0.14);
+    --dock-lens-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+    --dock-hover: rgb(255 255 255 / 0.07);
   }
 }
 
@@ -137,5 +275,6 @@
   :root {
     --dur-fast: 0ms;
     --dur-base: 0ms;
+    --dur-slow: 0ms;
   }
 }

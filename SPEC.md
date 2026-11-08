@@ -16,7 +16,7 @@ Install `@latest`. If a major version has moved since then, follow its docs over
 | UI framework | **None at scaffold time** | No interactive demos are planned. Add `@astrojs/react` only once a component needs client state |
 | Content | MDX + YAML in `src/content/`, Zod-validated collections | Stories live in git, and a malformed story fails the build |
 | Styling | Tailwind v4 (`@tailwindcss/vite`) + design tokens as CSS variables | Tokens are the single source of truth, and utilities read them |
-| Fonts | Astro Fonts API (`fonts` in config) | Self-hosted and preloaded. Placeholder families until Mattias picks |
+| Fonts | Astro Fonts API (`fonts` in config) | Self-hosted and preloaded. Inter (variable, 300–600, with its optical-size axis) sets body and display text, picked by Mattias; the headline is Inter Light at its display cut. JetBrains Mono for code |
 | Code blocks | Shiki (built in), light/dark pair | Used by notes |
 | Hosting | Vercel, static, **no adapter** | Pushes deploy previews; `main` deploys to production |
 | Package manager | npm | Swap for pnpm if preferred |
@@ -70,7 +70,8 @@ mattias-portfolio/
 ├─ src/
 │  ├─ assets/work/<slug>/        # mock-data screenshots and diagrams, one folder per case study
 │  ├─ components/
-│  │  ├─ site/    Header.astro · Footer.astro · Nav.astro · Seo.astro · ThemeToggle.astro · SkipLink.astro
+│  │  ├─ site/    Header.astro · Footer.astro · Nav.astro · Seo.astro · ThemeToggle.astro · SkipLink.astro · Arrow.astro
+│  │  ├─ apron/   RadarBand.astro · Terminal.astro · TerminalDive.astro · StandArt.astro · Stand.astro
 │  │  ├─ work/    WorkCard.astro · SummaryCard.astro · MetricList.astro · BeatNav.astro · ProofPoints.astro · Pager.astro
 │  │  ├─ notes/   NoteItem.astro
 │  │  └─ mdx/     Figure.astro · Metric.astro · Decision.astro · Aside.astro · index.ts
@@ -85,7 +86,7 @@ mattias-portfolio/
 │  │  └─ cv.yaml
 │  ├─ content.config.ts
 │  ├─ layouts/   BaseLayout.astro · ProseLayout.astro · CaseStudyLayout.astro
-│  ├─ lib/       beats.ts · content.ts · format.ts · remark-reading-time.mjs
+│  ├─ lib/       beats.ts · content.ts · format.ts · remark-reading-time.mjs · apron/ (planes.ts · radar.ts · terminal.ts)
 │  ├─ pages/
 │  │  ├─ index.astro
 │  │  ├─ work/index.astro · work/[slug].astro
@@ -235,12 +236,15 @@ They are passed with `<Content components={mdxComponents} />` (from `components/
 - `BeatNav` is generated from `BEATS`, sticky on wide screens and a horizontal scroll row on narrow ones. It highlights the active beat.
 - `WorkCard` shows title, summary, org, period, read time and up to 2 metrics.
 - `ProofPoints` is a compact list: title, detail, year, optional metric.
+- The home hero is the name and role in clear air with a storm all around: `introTitle` from `site.ts`, its last words (`introTitleRole`) on their own line with halation (the ink stays dark and orange bleeds off the letters' edges), then a one-line `intro` and a link down to Selected work. The hero fills the first screen, and `RadarBand` fills it behind them, full bleed: the storm runs off the top and both sides and thins out just below the fold. The header leaves out the name on the home page, since the headline is the name.
+- `Terminal` is the home page's Selected work: one apron scene drawn at build time (`lib/apron/terminal.ts`, same camera as the planes). Each case study's plane parks nose-in along a plain terminal pier on a bare apron (no stand markings or jet bridges), with its glass gate sign (number and title) just past its tail; a control tower behind the last stands turns its radar antenna. Hovering or focusing a plane or its sign lights the stand and drops a small peek under the sign (org and dates, the summary, the first metric), anchor-positioned so it stays on screen. On phones the whole scene fits the screen, the signs show only their numbers, and a numbered list of the projects follows it. Clicking hands off to the case study: the plane flies into its `SummaryCard` stand while the rest fades (`TerminalDive`, a view transition). All of it is CSS: no client JS.
 
 **Client JS budget.** These are the only scripts allowed, all as vanilla `<script>` in `.astro` files:
 
 1. Theme init: inline in `<head>`, under 1 KB, sets `data-theme` before paint. Wrap the `localStorage` read/write in try/catch.
 2. `ThemeToggle`
 3. `BeatNav` active-section highlight (IntersectionObserver)
+4. `RadarBand`: paints the storm behind the home hero on a canvas at device resolution, in 9px cells on every screen, drifts it along its line (held still under reduced motion), frays it around each line of the hero's words (`clearAir` in `lib/apron/radar.ts`: a wandering edge and a fringe that thins out cell by cell, never a straight edge) and warms the cells under the mouse. Without JS the start of the drift shows as an SVG band along the hero's foot.
 
 ---
 
@@ -259,7 +263,7 @@ They are passed with `<Content components={mdxComponents} />` (from `components/
   @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
   ```
   - In `tokens.css`, define colors inside `@theme { --color-*: initial; --color-bg: …; }`, which removes Tailwind's default palette so only tokens exist. Override the same variables under `[data-theme="dark"]`, with a `@media (prefers-color-scheme: dark) { :root:not([data-theme]) { … } }` fallback for no-JS.
-  - Fonts: the Fonts API sets `--font-body` and `--font-code`. Map them with `@theme inline { --font-sans: var(--font-body); --font-mono: var(--font-code); }`.
+  - Fonts: the Fonts API sets `--font-body` and `--font-code`. Map them with `@theme inline { --font-sans: var(--font-body); --font-mono: var(--font-code); --font-display: var(--font-body); }`.
 - **`prose.css`** styles MDX output (h2, h3, p, lists, blockquote, code, pre, figure, table) with tokens. Don't use `@tailwindcss/typography`. Include the Shiki dual-theme switch on `[data-theme=dark]`.
 - **`print.css`** hides header, footer and theme toggle and sets black-on-white text. Used mainly by `/cv`.
 - Respect `prefers-reduced-motion`. Visible focus styles on every interactive element.
@@ -372,7 +376,7 @@ Static Astro site. SPEC.md is the source of truth. Read it before structural cha
 Rules
 - Never write copy (headlines, bios, story text). Leave `TODO(mattias)`.
 - Don't change token values, fonts or the visual design. Mattias owns design.
-- No client JS beyond theme init, ThemeToggle and BeatNav. No new dependencies without asking.
+- No client JS beyond theme init, ThemeToggle, BeatNav and RadarBand. No new dependencies without asking.
 - GAIA: mock-data screenshots only. No source, schema, customer names, or pricing/commission logic.
 - Case studies keep the six H2 beats in order (see src/lib/beats.ts).
 - Before committing: `npm run build` must pass.

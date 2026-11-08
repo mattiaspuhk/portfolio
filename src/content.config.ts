@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob, file } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { AIRCRAFT } from './lib/apron/planes';
 
 const metric = z.object({
   label: z.string(), // e.g. "Time to first words"
@@ -27,6 +28,8 @@ const work = defineCollection({
         coverAlt: z.string().optional(),
         disclosure: z.enum(['mock-data', 'concept']).optional(), // renders its notice on the page
         draft: z.boolean().default(false),
+        // The plane parked on the project's stand, on the home page and the case-study header.
+        aircraft: z.enum(AIRCRAFT).default('narrow'),
       })
       .refine((d) => !d.cover || !!d.coverAlt, { message: 'coverAlt is required when cover is set' }),
 });

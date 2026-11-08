@@ -1,4 +1,8 @@
 ---
+// The name at the top of the page, except on the home page, where the headline is the name. The nav
+// and the theme toggle float in the dock at the bottom of the window (dock.css); they stay in the
+// header's markup so they come right after the name in tab order and print.css still hides them
+// with the header.
 import { site } from '@/config/site';
 import Nav from './Nav.astro';
 import ThemeToggle from './ThemeToggle.astro';
@@ -11,11 +15,36 @@ const { currentPath } = Astro.props;
 ---
 
 <header class="site-header mx-auto w-full max-w-(--page-width) px-(--gutter) py-(--space-md)">
-  <div class="flex flex-wrap items-center justify-between gap-(--space-sm)">
-    <a href="/">{site.name}</a>
-    <div class="flex flex-wrap items-center gap-(--space-md)">
-      <Nav items={site.nav} label={site.labels.mainNav} currentPath={currentPath} />
-      <ThemeToggle label={site.labels.themeToggle} />
-    </div>
+  {currentPath !== '/' && <a href="/">{site.name}</a>}
+  <div class="dock">
+    <Nav items={site.nav} label={site.labels.mainNav} currentPath={currentPath} />
+    <ThemeToggle label={site.labels.themeToggle} class="dock-glass dock-toggle">
+      <svg
+        class="dock-icon dock-icon-moon"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M13 9.6A5.5 5.5 0 1 1 6.4 3a4.4 4.4 0 0 0 6.6 6.6z"></path>
+      </svg>
+      <svg
+        class="dock-icon dock-icon-sun"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <circle cx="8" cy="8" r="2.75"></circle>
+        <path
+          d="M8 1.75v1.5M8 12.75v1.5M1.75 8h1.5M12.75 8h1.5M3.6 3.6l1.06 1.06M11.34 11.34l1.06 1.06M3.6 12.4l1.06-1.06M11.34 4.66l1.06-1.06"
+        ></path>
+      </svg>
+    </ThemeToggle>
   </div>
 </header>

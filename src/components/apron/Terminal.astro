@@ -1,0 +1,173 @@
+---
+// The home page's Selected work as one apron scene. Each project's plane parks
+// nose-in at a numbered stand along a plain terminal pier, its gate sign (number and title) just past its
+// tail, and a tower past the last stand turns a radar antenna. Hovering or focusing a plane or its
+// sign lights the stand and drops a small peek of the project under the sign. CSS only: the light
+// and the peek follow :hover and :focus-visible through :has(), the peek keeps itself on screen with
+// anchor positioning, and the antenna turns on an animated angle. On phones the signs shrink to
+// their numbers and the projects are listed under the scene. Clicking dives into the stand
+// (TerminalDive.astro).
+import type { CollectionEntry } from 'astro:content';
+import MetricFigure from '@/components/work/MetricFigure.astro';
+import { site } from '@/config/site';
+import { drawAircraft, standViewBox } from '@/lib/apron/planes';
+import { terminalScene, type Box } from '@/lib/apron/terminal';
+import { formatPeriod, standNumber } from '@/lib/format';
+
+interface Props {
+  /** Sorted, back stand first. */
+  entries: CollectionEntry<'work'>[];
+  /** Heading level of the titles, to fit the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { entries, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+const scene = terminalScene(entries.map((entry) => entry.data.aircraft));
+const pct = (n: number) => `${Math.round(n * 1000) / 1000}%`;
+const place = (b: Box) => `left: ${pct(b.x)}; top: ${pct(b.y)}; width: ${pct(b.w)}; height: ${pct(b.h)}`;
+
+const stands = entries.map((entry, i) => ({
+  entry,
+  number: standNumber(entry.data.order),
+  drawing: drawAircraft(entry.data.aircraft),
+  at: scene.stands[i]!,
+}));
+
+// A stand is in several layers (the ground, its plane, its sign), so each gate gets rules that reach
+// them all. One lights the stand. The other names its plane and peek for the view transition, so
+// only the plane you click flies into the case study and the rest go with the apron. Naming follows
+// focus too: a clicked link keeps it, while the browser drops hover before it captures.
+const rules = stands
+  .map(({ number }) => {
+    const lit = `.terminal:has(.gate-${number}:is(:hover, :focus-visible))`;
+    const picked = `.terminal:has(.gate-${number}:is(:hover, :focus))`;
+    return (
+      `${lit} .t-stand-${number}{--t-lit:1;transition-duration:var(--dur-base)}` +
+      `${picked} .t-plane.t-stand-${number}{view-transition-name:stand-${number}}` +
+      `${picked} .t-stand-${number} .peek{view-transition-name:peek-${number};view-transition-class:peek}`
+    );
+  })
+  .join('');
+---
+
+<div class="terminal-scroll">
+  <div class="terminal" style={`aspect-ratio: ${scene.aspect}`}>
+    <Fragment set:html={`<style>${rules}</style>`} />
+
+    <svg class="t-layer" viewBox={scene.viewBox} aria-hidden="true">
+      <defs>
+        {
+          stands.map(({ number }) => (
+            <radialGradient id={`t-pool-${number}`}>
+              <stop offset="0" class="stand-pool-stop" stop-opacity="0.5" />
+              <stop offset="0.55" class="stand-pool-stop" stop-opacity="0.16" />
+              <stop offset="1" class="stand-pool-stop" stop-opacity="0" />
+            </radialGradient>
+          ))
+        }
+      </defs>
+      {
+        stands.map(({ number, drawing, at }) => (
+          <g class={`t-stand t-stand-${number}`} transform={`translate(${at.translate.x} ${at.translate.y})`}>
+            <circle class="stand-pool" r={drawing.ground.poolR} transform={`matrix(${drawing.ground.poolMatrix})`} fill={`url(#t-pool-${number})`} />
+            <path class="stand-shadow" d={drawing.ground.shadow} />
+          </g>
+        ))
+      }
+    </svg>
+
+    <svg class="t-layer t-scenery" viewBox={scene.viewBox} aria-hidden="true" set:html={scene.tower} />
+
+    <svg class="t-antenna" viewBox={scene.antenna.viewBox} style={place(scene.antenna.box)} aria-hidden="true">
+      {scene.antenna.faces.map((face) => <path class={`t-${face.skin}`} d={face.d} style={`transform: ${face.transform}; opacity: ${face.show}`} />)}
+    </svg>
+
+    {
+      stands.map(({ number, drawing, at }) => (
+        <>
+          <svg class={`t-plane t-stand t-stand-${number}`} viewBox={standViewBox()} style={place(at.plane)} aria-hidden="true">
+            <g class="stand-plane" set:html={drawing.body} />
+            <circle class="stand-beacon-glow" cx={drawing.beacon.x} cy={drawing.beacon.y} r="16" fill="url(#t-beacon)" />
+            <circle class="stand-beacon" cx={drawing.beacon.x} cy={drawing.beacon.y} r="3.5" />
+          </svg>
+        </>
+      ))
+    }
+
+    <svg class="t-layer t-scenery" viewBox={scene.viewBox} aria-hidden="true" set:html={scene.building} />
+
+    <svg class="t-defs" aria-hidden="true">
+      <radialGradient id="t-beacon">
+        <stop offset="0" class="stand-beacon-stop" stop-opacity="0.55" />
+        <stop offset="1" class="stand-beacon-stop" stop-opacity="0" />
+      </radialGradient>
+    </svg>
+
+    <ol class="t-gates">
+      {
+        stands.map(({ entry, number, at }) => {
+          const { title, summary, org, period, metrics } = entry.data;
+          const metric = metrics[0];
+          return (
+            <li
+              class={`t-stand t-stand-${number}`}
+              style={`--hx: ${pct(at.hit.x)}; --hy: ${pct(at.hit.y)}; --hw: ${pct(at.hit.w)}; --hh: ${pct(at.hit.h)}`}
+            >
+              <Heading class="t-gate-heading">
+                <a
+                  class={`gate gate-${number}`}
+                  href={`/work/${entry.id}`}
+                  aria-describedby={`peek-${number}`}
+                  style={`--sx: ${pct(at.sign.x)}; --sy: ${pct(at.sign.y)}; --hull: ${at.hull}`}
+                >
+                  <span class="gate-sign" style={`anchor-name: --gate-${number}`}>
+                    <span class="gate-number">{number}</span>
+                    <span class="gate-title">{title}</span>
+                  </span>
+                </a>
+              </Heading>
+              <div class="peek" style={`position-anchor: --gate-${number}`}>
+                <div class="peek-bento">
+                  <div class="peek-tile">
+                    <p class="peek-label">{`${org} · ${formatPeriod(period, site.labels.present)}`}</p>
+                    <p class="peek-summary" id={`peek-${number}`}>
+                      {summary}
+                    </p>
+                  </div>
+                  {metric && (
+                    <div class="peek-tile">
+                      <p class="peek-label">{metric.label}</p>
+                      <p class="peek-figure">
+                        <MetricFigure before={metric.before} after={metric.after} />
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </div>
+
+  <!-- Phones: the scene is too small to name the planes in, so the signs show only their numbers
+       and the projects are listed here. Each row repeats its gate's link for touch; the gates above
+       stay the links that assistive tech and the keyboard use. -->
+  <ol class="t-list" aria-hidden="true">
+    {
+      stands.map(({ entry, number }) => (
+        <li>
+          <a href={`/work/${entry.id}`} tabindex="-1">
+            <span class="gate-number">{number}</span>
+            <span class="t-list-text">
+              <span class="t-list-title">{entry.data.title}</span>
+              <span class="t-list-org">{entry.data.org}</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</div>

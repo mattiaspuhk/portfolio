@@ -1,0 +1,510 @@
+/*
+ * The terminal scene, the home page's Selected work (Terminal.astro). Layers, back to front: the
+ * ground (floodlight pools, shadows), the tower and its antenna, each stand's plane (one SVG per
+ * plane, so each keeps its view-transition-name), the pier in front of them, then the gate signs
+ * beside the tails and the peeks under them. On phones a plain list of the projects follows. Colours come from tokens.css, mixed here; the planes
+ * and their light reuse apron.css.
+ */
+
+/* The antenna's heading. Registered so it animates; its cos and sin turn every face. */
+@property --radar-a {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
+/* How lit a stand is, 0 to 1. Its gate lights it (a rule per gate in Terminal.astro). */
+@property --t-lit {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@layer components {
+  .terminal {
+    --t-wall: color-mix(in oklab, var(--color-text) 3%, var(--color-bg));
+    --t-glass: color-mix(in oklab, var(--color-text) 7%, var(--color-bg));
+    --t-tray: color-mix(in oklab, var(--color-text) 5%, var(--color-bg));
+
+    position: relative;
+    width: 100%;
+    isolation: isolate;
+    /* Clicking a plane dives into its stand: the case page zooms this away (TerminalDive.astro).
+       Opaque, so the dive covers the page it's diving into until it dissolves. */
+    background: var(--color-bg);
+    view-transition-name: apron;
+  }
+
+  .t-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .t-plane,
+  .t-antenna {
+    position: absolute;
+    overflow: visible;
+  }
+
+  .t-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  /* ---------- Scenery ---------- */
+
+  .t-scenery path,
+  .t-antenna path {
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* Fills are stroked in their own colour so neighbouring faces leave no seams */
+  .t-wall,
+  .t-concrete {
+    fill: var(--t-wall);
+    stroke: var(--t-wall);
+    stroke-width: 0.6px;
+  }
+
+  .t-roof {
+    fill: var(--color-bg);
+    stroke: var(--color-bg);
+    stroke-width: 0.6px;
+  }
+
+  .t-glass {
+    fill: var(--t-glass);
+    stroke: var(--t-glass);
+    stroke-width: 0.6px;
+  }
+
+  .t-cab {
+    fill: var(--color-text);
+    stroke: var(--color-text);
+    stroke-width: 0.6px;
+  }
+
+  .t-livery {
+    fill: var(--apron-livery);
+  }
+
+  /* Mullions on the tower's dark glass */
+  .e-g {
+    fill: none;
+    stroke: var(--color-bg);
+    stroke-width: 0.8px;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.55;
+  }
+
+  /* The antenna draws each face whole, outline and all */
+  .t-antenna path {
+    stroke: var(--color-text);
+    stroke-width: 1px;
+    transform-box: view-box;
+    transform-origin: 0 0;
+  }
+
+  /* A quiet turn, about 12 a minute like the real thing, clockwise seen from above */
+  .t-antenna {
+    --ac: cos(var(--radar-a));
+    --as: sin(var(--radar-a));
+    animation: t-radar 5s linear infinite;
+  }
+
+  @keyframes t-radar {
+    from {
+      --radar-a: 360deg;
+    }
+    to {
+      --radar-a: 0deg;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .t-antenna {
+      animation: none;
+      --radar-a: -70deg;
+    }
+  }
+
+  /* ---------- Light ---------- */
+
+  .t-stand {
+    transition: --t-lit var(--dur-slow) var(--ease);
+  }
+
+  .terminal :is(.stand-pool, .stand-beacon, .stand-beacon-glow) {
+    opacity: var(--t-lit);
+    transition: none;
+  }
+
+  .terminal .stand-number {
+    opacity: calc(0.55 + 0.45 * var(--t-lit));
+    transition: none;
+  }
+
+  /* ---------- Gate signs and hit areas ---------- */
+
+  .t-gates {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .gate {
+    pointer-events: auto;
+  }
+
+  /* The plane itself is the link: its outline, over the drawing */
+  .gate::after {
+    content: '';
+    position: absolute;
+    left: var(--hx);
+    top: var(--hy);
+    width: var(--hw);
+    height: var(--hh);
+    clip-path: var(--hull);
+  }
+
+  /* A glass pill on the apron just past the tail, in the dock's material. Lit, it takes the dock's
+     lens: the glass brightens, its rim catches more light and the stand number glows like a lit sign. */
+  .gate-sign {
+    position: absolute;
+    left: var(--sx);
+    top: var(--sy);
+    z-index: 1;
+    isolation: isolate;
+    translate: 0 -50%;
+    margin-left: 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.875rem 0.25rem 0.25rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--dock-tint), var(--dock-lens) calc(var(--t-lit) * 100%));
+    -webkit-backdrop-filter: blur(var(--dock-blur)) saturate(var(--dock-saturate));
+    backdrop-filter: blur(var(--dock-blur)) saturate(var(--dock-saturate));
+    box-shadow:
+      inset 0 0 0 1px var(--dock-edge),
+      inset 0 0 14px var(--dock-glow),
+      0 calc(4px + var(--t-lit) * 4px) calc(12px + var(--t-lit) * 10px) -6px rgb(0 0 0 / calc(0.18 + var(--t-lit) * 0.14));
+    color: color-mix(in oklab, var(--dock-ink), var(--color-text) calc(var(--t-lit) * 100%));
+    font-size: var(--text-sm);
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  /* Sheen from above, as on the dock */
+  .gate-sign::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(to bottom, var(--dock-sheen), transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Rim: brightest at the top left, and brighter still when lit */
+  .gate-sign::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      var(--dock-rim),
+      color-mix(in oklab, var(--dock-rim-faint), var(--dock-rim-low) calc(var(--t-lit) * 100%)) 35%,
+      var(--dock-rim-faint) 65%,
+      var(--dock-rim-low)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .gate-number {
+    display: grid;
+    place-items: center;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    padding-inline: 0.375rem;
+    border-radius: 999px;
+    background: var(--apron-tag);
+    color: var(--apron-tag-ink);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.45),
+      0 0 calc(var(--t-lit) * 14px) color-mix(in oklab, var(--apron-tag) calc(var(--t-lit) * 80%), transparent);
+  }
+
+  .gate:focus-visible {
+    outline: none;
+  }
+
+  .gate:focus-visible .gate-sign {
+    outline: var(--focus-ring-width) solid var(--color-accent);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* ---------- Peek: a small card hanging under its sign, always on screen ---------- */
+
+  /*
+   * Closed, the peek isn't laid out at all. Each time it opens it starts afresh, so the browser places
+   * it against the window as it is now, scrolled, rather than as it was when the page loaded. It
+   * fades in from @starting-style and keeps its box until it has faded out.
+   * Without anchor positioning it just hangs under the sign.
+   */
+  .peek {
+    --peek-w: 18rem;
+    --peek-gap: 0.5rem;
+
+    display: none;
+    position: absolute;
+    left: calc(var(--sx) + 0.375rem);
+    top: calc(var(--sy) + 1.125rem + var(--peek-gap));
+    z-index: 2;
+    width: var(--peek-w);
+    opacity: 0;
+    translate: 0 -0.375rem;
+    pointer-events: none;
+    transition-property: opacity, translate, display;
+    transition-duration: var(--dur-slow);
+    transition-timing-function: var(--ease);
+    transition-behavior: allow-discrete;
+  }
+
+  /*
+   * With it, the peek is fixed to the window and anchored to its sign. It tries, in order: under the
+   * sign, over it, then the same pulled in from the right edge, then docked just above the menu bar.
+   * Each try keeps a margin clear of the window's edges and of the dock, so the peek is never cut off.
+   */
+  @supports (position-anchor: --a) {
+    .peek {
+      position: fixed;
+      left: anchor(left);
+      top: calc(anchor(bottom) + var(--peek-gap));
+      /* Only on the sides it isn't positioned from, so the margins keep room without moving it */
+      margin: 0 var(--space-sm) var(--dock-clearance) 0;
+      position-try-fallbacks: --peek-above, --peek-under-in, --peek-above-in, --peek-dock;
+    }
+  }
+
+  .t-gates > li:has(.gate:focus-visible) .peek {
+    display: block;
+    opacity: 1;
+    translate: 0;
+    transition-duration: var(--dur-base);
+
+    @starting-style {
+      opacity: 0;
+      translate: 0 -0.375rem;
+    }
+  }
+
+  /* Moving straight from one plane to the next, the last peek gets out of the way at once */
+  .terminal:has(.gate:focus-visible) .t-gates > li:not(:has(.gate:focus-visible)) .peek {
+    transition-duration: var(--dur-fast);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .t-gates > li:has(.gate:hover) .peek {
+      display: block;
+      opacity: 1;
+      translate: 0;
+      transition-duration: var(--dur-base);
+
+      @starting-style {
+        opacity: 0;
+        translate: 0 -0.375rem;
+      }
+    }
+
+    .terminal:has(.gate:hover) .t-gates > li:not(:has(.gate:hover)) .peek {
+      transition-duration: var(--dur-fast);
+    }
+  }
+
+  /* Solid: a tray in the dock's finish holding two tiles a step lighter, what it is and its figure */
+  .peek-bento {
+    display: grid;
+    gap: 0.375rem;
+    padding: 0.375rem;
+    border-radius: calc(var(--radius-lg) + 0.375rem);
+    background: var(--t-tray);
+    box-shadow:
+      inset 0 0 0 1px var(--dock-edge),
+      inset 0 1px 0 var(--dock-rim-low),
+      var(--dock-shadow);
+  }
+
+  .peek-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+    padding: var(--space-sm) var(--space-sm) 0.875rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+    box-shadow:
+      inset 0 1px 0 var(--dock-rim-low),
+      inset 0 0 0 1px color-mix(in oklab, var(--color-text) 7%, transparent);
+    font-size: var(--text-sm);
+  }
+
+  .peek-label {
+    color: var(--color-muted);
+    font-size: var(--text-xs);
+  }
+
+  .peek-summary {
+    line-height: 1.45;
+  }
+
+  .peek-figure {
+    font-size: var(--text-xl);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .peek-figure .metric-before {
+    color: var(--color-muted);
+    text-decoration: line-through;
+  }
+
+  .peek-figure strong {
+    font-weight: 600;
+  }
+
+  /* ---------- Full bleed, like the radar band ---------- */
+
+  .terminal-scroll {
+    --scene-w: min(100vw, 100rem);
+
+    width: var(--scene-w);
+    margin-inline: calc(50% - var(--scene-w) / 2);
+  }
+
+  .t-list {
+    display: none;
+  }
+
+  /* ---------- Phones: the whole scene on screen, signs down to their numbers, a list below ---------- */
+
+  @media (max-width: 47.99rem) {
+    .gate-sign {
+      gap: 0;
+      padding: 0.1875rem;
+    }
+
+    .gate-sign .gate-number {
+      min-width: 1.5rem;
+      height: 1.5rem;
+      padding-inline: 0.25rem;
+    }
+
+    .gate-title {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .peek {
+      display: none;
+    }
+
+    .t-list {
+      display: block;
+      margin-top: var(--space-lg);
+      padding-inline: var(--gutter);
+      border-top: var(--border-width) solid var(--color-border);
+    }
+
+    .t-list > li {
+      border-bottom: var(--border-width) solid var(--color-border);
+    }
+
+    .t-list a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-block: var(--space-sm);
+    }
+
+    .t-list-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .t-list-title {
+      font-weight: 500;
+    }
+
+    .t-list-org {
+      color: var(--color-muted);
+      font-size: var(--text-sm);
+    }
+  }
+}
+
+/* The peek's fallbacks, in the order .peek tries them */
+@position-try --peek-above {
+  top: auto;
+  bottom: calc(anchor(top) + var(--peek-gap));
+  margin: var(--space-sm) var(--space-sm) 0 0;
+}
+
+@position-try --peek-under-in {
+  left: auto;
+  right: anchor(right);
+  margin: 0 0 var(--dock-clearance) var(--space-sm);
+}
+
+@position-try --peek-above-in {
+  left: auto;
+  right: anchor(right);
+  top: auto;
+  bottom: calc(anchor(top) + var(--peek-gap));
+  margin: var(--space-sm) 0 0 var(--space-sm);
+}
+
+@position-try --peek-dock {
+  left: max(var(--gutter), calc(50vw - var(--peek-w) / 2));
+  top: auto;
+  bottom: var(--dock-clearance);
+  margin: 0;
+}
+
+/* Coming back from a case study, the camera pulls back out over the apron. The dive in is styled
+   by the case page (TerminalDive.astro), since the page you arrive on runs the transition. */
+::view-transition-new(apron) {
+  animation: terminal-pull-back var(--dur-slow) cubic-bezier(0.2, 0.75, 0.15, 1) both;
+}
+
+@keyframes terminal-pull-back {
+  from {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+}

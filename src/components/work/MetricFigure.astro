@@ -1,0 +1,29 @@
+---
+import Arrow from '@/components/site/Arrow.astro';
+import { site } from '@/config/site';
+
+interface Props {
+  before?: string;
+  after: string;
+}
+
+const { before, after } = Astro.props;
+const { metric: labels } = site.labels;
+// Spaced with gaps, not whitespace: Astro drops the line breaks between these spans. It's one
+// inline row, so it wraps as one piece and never strands "2" from "80 →".
+const row = 'inline-flex items-baseline gap-x-(--space-xs)';
+---
+
+<span class={row}>
+  {
+    before && (
+      <>
+        <span class="sr-only">{labels.before}</span>
+        <span class="metric-before">{before}</span>
+        <Arrow class="size-[1em] shrink-0 self-center" />
+      </>
+    )
+  }
+  <span class="sr-only">{labels.after}</span>
+  <strong>{after}</strong>
+</span>

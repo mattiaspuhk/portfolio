@@ -1,18 +1,25 @@
 ---
-// The storm behind the home page hero, full bleed. The storm is a function of place and time
-// (lib/apron/radar.ts); the script below paints it on a canvas at the screen's pixel density, so
-// every cell and gap lands on whole device pixels, drifts it along its line, and lets the pointer
-// warm the cells it passes. Without JS the start of the drift shows as an SVG band along the
-// hero's foot. Decorative.
-import { fieldPaths, radarField } from '@/lib/apron/radar';
+// The storm, full bleed, behind the home page hero or rising under the footer. The storm is a
+// function of place and time (lib/apron/radar.ts); the script below paints it on a canvas at the
+// screen's pixel density, so every cell and gap lands on whole device pixels, drifts it along its
+// line, and lets the pointer warm the cells it passes. Without JS the start of the drift shows as
+// an SVG band along the foot of its section. Decorative.
+import { FOOTER, fieldPaths, radarField } from '@/lib/apron/radar';
 
-const field = radarField();
+interface Props {
+  /** `hero` hangs from the top of the page and thins out past the hero's foot; `footer` rises from
+   * the bottom of the page and thins out upward. */
+  mode?: 'hero' | 'footer';
+}
+
+const { mode = 'hero' } = Astro.props;
+const field = mode === 'footer' ? radarField(7, FOOTER, { cols: 280, rows: 32 }) : radarField();
 const { levels, grid } = fieldPaths(field);
 ---
 
 <div
   class="radar"
-  data-radar
+  data-radar={mode}
   style={`--radar-cols: ${field.cols}; --radar-rows: ${field.rows}`}
   aria-hidden="true"
 >
@@ -26,7 +33,7 @@ const { levels, grid } = fieldPaths(field);
 </div>
 
 <script>
-  import { HERO, clearAir, thresholds, weather } from '@/lib/apron/radar';
+  import { FOOTER, HERO, clearAir, thresholds, weather, type Squall } from '@/lib/apron/radar';
 
   // Paints the radar. The canvas covers the hero, which fills the first screen, and reaches up to
   // the top of the page and a little past the hero's foot, so the storm runs off the top and both
@@ -34,14 +41,35 @@ const { levels, grid } = fieldPaths(field);
   // in clear air. The storm drifts along its line and boils as it goes. Under a mouse the nearby
   // cells warm up the --radar-* ramp and the empty grid shows faintly, rising in 200ms and cooling
   // over 600ms. Reduced motion holds the storm still.
-  const band = document.querySelector<HTMLElement>('[data-radar]');
-  const canvas = band?.querySelector('canvas');
-  const ctx = canvas?.getContext('2d');
-  const hero = band?.closest<HTMLElement>('.hero');
-  if (band && canvas && ctx && hero) {
+  //
+  // The footer's storm is the same weather turned over: it rises from the bottom of the page, under
+  // the dock, and thins out upward in its own strip below the words.
+  interface Mode {
+    squall: Squall;
+    /** The section the storm belongs to; the canvas covers it */
+    section: string;
+    /** Cells over which the storm thins out: past the hero's foot, or down from the top of the footer's strip */
+    spill: number;
+    /** The hero's storm reaches up to the top of the page and spills past its foot */
+    reaches: boolean;
+  }
+  const MODES: Record<string, Mode> = {
+    hero: { squall: HERO, section: '.hero', spill: 16, reaches: true }, // thinning out around the Selected work head
+    footer: { squall: FOOTER, section: '.footer-weather', spill: 10, reaches: false },
+  };
+
+  for (const band of document.querySelectorAll<HTMLElement>('[data-radar]')) {
+    const mode = MODES[band.dataset.radar ?? ''] ?? MODES.hero!;
+    const canvas = band.querySelector('canvas');
+    const ctx = canvas?.getContext('2d');
+    const section = band.closest<HTMLElement>(mode.section);
+    if (canvas && ctx && section) storm(band, canvas, ctx, section, mode);
+  }
+
+  function storm(band: HTMLElement, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, section: HTMLElement, mode: Mode) {
     const FLOW = 1.5; // cells a second the storm drifts along its line
     const SETTLE = 160; // ms time constant of a cell moving to its new level
-    const SPILL = 16; // cells the storm runs on past the hero's foot, thinning out around the Selected work head
+    const SPILL = mode.spill;
     const CLEARING = { clear: 12, fray: 32, soft: 64 }; // CSS px the storm keeps off the words
     const RADIUS = 76; // CSS px around the pointer that warms
     const WARM = 2.6; // ramp steps a cell climbs at the pointer
@@ -81,6 +109,7 @@ const { levels, grid } = fieldPaths(field);
     // its foot
     const cellSize = () => parseFloat(getComputedStyle(band).getPropertyValue('--radar-cell')) || 9;
     const reach = () => {
+      if (!mode.reaches) return;
       const above = band.getBoundingClientRect().top + scrollY;
       band.style.setProperty('--radar-above', `${Math.round(above)}px`);
       band.style.setProperty('--radar-below', `${Math.round(SPILL * cellSize())}px`);
@@ -122,12 +151,12 @@ const { levels, grid } = fieldPaths(field);
     // Levels the cells head for: all of them, or a third in turn, which the settling hides
     let turn = 0;
     const sample = (all: boolean) => {
-      for (let i = 0; i < cols; i++) line[i] = sky.centre(HERO, across[i]!, i, drift[i]!);
+      for (let i = 0; i < cols; i++) line[i] = sky.centre(mode.squall, across[i]!, i, drift[i]!);
       for (let j = 0; j < rows; j++) {
         for (let i = all ? 0 : (turn + j) % 3; i < cols; i += all ? 1 : 3) {
           const k = j * cols + i;
           const open = room[k]!;
-          const f = open < 0.01 ? 0 : sky.strength(i, j, down[j]!, line[i]!, HERO.spread, drift[i]!) * open;
+          const f = open < 0.01 ? 0 : sky.strength(i, j, down[j]!, line[i]!, mode.squall.spread, drift[i]!) * open;
           target[k] = f > 0 ? sky.level(f, i, j, drift[i]!, levels) : 0;
         }
       }
@@ -244,17 +273,19 @@ const { levels, grid } = fieldPaths(field);
       image = cellsCtx.createImageData(cols, rows);
       pixels = new Uint32Array(image.data.buffer);
 
-      // The squall is measured from the top of the page to the hero's foot, so it fills the first
-      // screen corner to corner and runs off its edges; past the foot it thins out
+      // The hero's squall is measured from the top of the page to the hero's foot, so it fills the
+      // first screen corner to corner and runs off its edges; past the foot it thins out. The
+      // footer's is measured from below its thinning band to the bottom of the page.
       const spill = SPILL * pitch;
       const frame = height - spill;
+      const offset = mode.reaches ? 0 : spill;
       for (let i = 0; i < cols; i++) across[i] = (x0 + (i + 0.5) * pitch) / width;
-      for (let j = 0; j < rows; j++) down[j] = (y0 + (j + 0.5) * pitch) / frame;
+      for (let j = 0; j < rows; j++) down[j] = (y0 + (j + 0.5) * pitch - offset) / frame;
 
       // Clear air: the line boxes of the words, in device pixels on the canvas
       const origin = canvas.getBoundingClientRect();
       const range = document.createRange();
-      const words = [...document.querySelectorAll('[data-radar-clear]')].flatMap((el) => {
+      const words = [...(mode.reaches ? document : section).querySelectorAll('[data-radar-clear]')].flatMap((el) => {
         range.selectNodeContents(el);
         return [...range.getClientRects()]
           .filter((r) => r.width && r.height)
@@ -262,7 +293,7 @@ const { levels, grid } = fieldPaths(field);
       });
       for (let j = 0; j < rows; j++) {
         const cy = y0 + (j + 0.5) * pitch;
-        const edge = smooth((height - cy) / spill);
+        const edge = smooth((mode.reaches ? height - cy : cy) / spill);
         for (let i = 0; i < cols; i++) {
           const k = j * cols + i;
           const cx = x0 + (i + 0.5) * pitch;
@@ -271,7 +302,7 @@ const { levels, grid } = fieldPaths(field);
             const d = Math.hypot(Math.max(l! - cx, 0, cx - r!), Math.max(t! - cy, 0, cy - b!));
             if (d < nearest) nearest = d;
           }
-          // Past the hero's foot, cells drop out at random as well as fading, so no edge runs straight
+          // In the thinning band, cells drop out at random as well as fading, so no edge runs straight
           const thin = edge < 1 && ((Math.imul(k, 0x9e3779b1) >>> 0) % 1024) / 1023 > edge * 1.15;
           room[k] = thin ? 0 : edge * clearing(i, j, nearest / scale);
           grain[k] = 0.65 + 0.35 * (((Math.imul(k, 2654435761) >>> 0) % 1024) / 1023);
@@ -342,7 +373,7 @@ const { levels, grid } = fieldPaths(field);
     new ResizeObserver(() => {
       reach();
       relayout();
-    }).observe(hero);
+    }).observe(section);
     document.fonts.ready.then(relayout);
     // Moving to a screen with another density doesn't always resize the canvas
     const watchDensity = () =>

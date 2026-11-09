@@ -38,6 +38,32 @@ const { title, description, ogImage, noindex } = Astro.props;
         document.documentElement.dataset.theme = theme;
       })();
     </script>
+    <script is:inline>
+      // Clicks during a page transition: newer Chrome sends them to the page root, not the link
+      // under the pointer, so a click ends the transition and follows that link itself.
+      (() => {
+        let active = null;
+        addEventListener('pagereveal', (e) => {
+          active = e.viewTransition;
+          active?.finished.finally(() => (active = null));
+        });
+        document.addEventListener(
+          'click',
+          (e) => {
+            const transition = document.activeViewTransition ?? active;
+            if (!transition) return;
+            transition.skipTransition();
+            active = null;
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            const link = document.elementFromPoint(e.clientX, e.clientY)?.closest('a[href]');
+            if (!link || e.target === link || link.contains(e.target)) return;
+            e.preventDefault();
+            link.click();
+          },
+          true,
+        );
+      })();
+    </script>
   </head>
   <body class="flex min-h-dvh flex-col">
     <SkipLink label={site.labels.skipLink} />

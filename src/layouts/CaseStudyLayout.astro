@@ -14,9 +14,11 @@ interface Props {
   minutesRead: number;
   prev?: Work;
   next?: Work;
+  /** Beats present on this page, from assertBeats. */
+  beats: { label: string; slug: string }[];
 }
 
-const { entry, minutesRead, prev, next } = Astro.props;
+const { entry, minutesRead, prev, next, beats } = Astro.props;
 const { title, summary, order, org, role, period, stack, metrics, cover, coverAlt, tldr, disclosure, kind } = entry.data;
 const toLink = (work?: Work) => work && { href: `/work/${work.id}`, title: work.data.title };
 ---
@@ -41,7 +43,7 @@ const toLink = (work?: Work) => work && { href: `/work/${work.id}`, title: work.
       tldr={tldr}
     />
     <div class="flex flex-col gap-(--space-lg) lg:grid lg:grid-cols-[auto_1fr] lg:gap-(--space-xl)">
-      <BeatNav label={site.labels.beatNav} />
+      <BeatNav label={site.labels.beatNav} beats={beats} />
       <div class="prose">
         <slot />
       </div>

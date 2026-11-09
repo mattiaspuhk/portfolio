@@ -4,9 +4,9 @@ Static Astro site. docs/SPEC.md (local, gitignored) is the source of truth. Read
 Rules
 - Never write copy (headlines, bios, story text). Leave `TODO(mattias)`.
 - Don't change token values, fonts or the visual design. Mattias owns design.
-- No client JS beyond theme init, ThemeToggle, BeatNav and RadarBand. No new dependencies without asking.
+- No client JS beyond theme init, the transition-click fix (BaseLayout), ThemeToggle, BeatNav and RadarBand. No new dependencies without asking.
 - GAIA: mock-data screenshots only. No source, schema, customer names, or pricing/commission logic.
-- Case studies keep the six H2 beats in order (see src/lib/beats.ts).
+- Case studies keep the six H2 beats in order (see src/lib/beats.ts). Sprints may drop When it broke and Next.
 - Before committing: `npm run build` must pass.
 
 ## Agent skills

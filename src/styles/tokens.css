@@ -160,18 +160,22 @@
   --radar-5: #aa2d00;
   /* Selected text: the radar band's softest return, in the halo's ink */
   --selection-bg: var(--radar-1);
+  /* Gate date signs: a mid return from the radar band, in the tags' dark ink */
+  --gate-sign: var(--radar-3);
   --selection-ink: var(--halo-ink);
+  /* Footer (apron.css): the email address as the sign-off. TODO(mattias): a first guess. */
+  --text-signoff: clamp(1.75rem, 0.9rem + 3.2vw, 3.25rem);
 
   /*
    * Dock (dock.css): the nav in a glass pill at the bottom of the window, the theme toggle in a
-   * glass button beside it. The glass is a thin tint of the page over a blurred, saturated view of
+   * glass button beside it. The glass is a tint of the page over a blurred, saturated view of
    * what passes behind. Its rim catches the light at the top left (rim), fades along the sides
    * (rim-faint) and catches it again at the bottom right (rim-low); light gathers inside its edges
    * (glow) and falls on it from above (sheen). The page you're on sits under a lens: a faint ink
    * tint in the light theme, brighter glass in the dark.
    * Labels are ink, a touch softer than text, so they still read over the orange band.
    */
-  --dock-tint: color-mix(in oklab, var(--color-bg) 40%, transparent);
+  --dock-tint: color-mix(in oklab, var(--color-bg) 66%, transparent);
   --dock-tint-solid: color-mix(in oklab, var(--color-bg) 94%, transparent); /* no blur available */
   --dock-blur: 16px;
   --dock-saturate: 2;
@@ -224,7 +228,9 @@
   --radar-4: #fb8e31;
   --radar-5: #fed29c;
   --selection-bg: var(--radar-2);
-  --dock-tint: color-mix(in oklab, var(--color-surface) 45%, transparent);
+  --gate-sign: var(--radar-4);
+  --dock-tint: color-mix(in oklab, var(--color-surface) 72%, transparent);
+  --dock-ink: color-mix(in oklab, var(--color-text) 90%, var(--color-bg));
   --dock-tint-solid: color-mix(in oklab, var(--color-surface) 94%, transparent);
   --dock-rim: rgb(255 255 255 / 0.32);
   --dock-rim-faint: rgb(255 255 255 / 0.05);
@@ -272,7 +278,9 @@
     --radar-4: #fb8e31;
     --radar-5: #fed29c;
     --selection-bg: var(--radar-2);
-    --dock-tint: color-mix(in oklab, var(--color-surface) 45%, transparent);
+    --gate-sign: var(--radar-4);
+    --dock-tint: color-mix(in oklab, var(--color-surface) 72%, transparent);
+    --dock-ink: color-mix(in oklab, var(--color-text) 90%, var(--color-bg));
     --dock-tint-solid: color-mix(in oklab, var(--color-surface) 94%, transparent);
     --dock-rim: rgb(255 255 255 / 0.32);
     --dock-rim-faint: rgb(255 255 255 / 0.05);

@@ -1,7 +1,7 @@
 ---
 title: 'AI data import'
-summary: 'An import that reads spreadsheets, vCards and business-card photos, asks a couple of questions, and saves nothing until the user approves it.'
-tldr: 'Customers came to GAIA with contacts in spreadsheets and photos of business cards. I built an import where an agent reads the file, asks a couple of multiple-choice questions and stages everything for review. Nothing is saved until the user approves it. When an 819-row import locked an organisation out, the model was fine. The commit was the problem, and I cut it from 1,600 statements to 2.'
+summary: 'An import that reads spreadsheets, vCards and business-card photos as they are and maps them itself, so nobody matches columns by hand.'
+tldr: 'Customers came to GAIA with contacts in spreadsheets and photos of business cards. I built an import where an agent reads the file, asks a couple of multiple-choice questions and stages everything for review. When an 819-row import locked an organisation out, the model was fine. The commit was the problem, and I cut it from 1,600 statements to 2.'
 order: 1
 org: 'RingIT · GAIA'
 role: 'Designed and built it end to end'
@@ -9,12 +9,9 @@ period:
   start: 2026-06-10
   end: 2026-08-28
 stack: ['NestJS', 'React', 'TypeScript', 'Vertex AI (Gemini)', 'Vercel AI SDK', 'Pub/Sub', 'Langfuse']
-metrics:
-  - label: 'Statements per 40-row commit'
-    before: '80'
-    after: '2'
-  # TODO(mattias): add the usage number (imports run or rows imported) once you've pulled it
 cover: ../../assets/work/ai-data-import/cover.png
+thumb: ../../assets/work/ai-data-import/thumb.png
+thumbAlt: 'A probable duplicate in the GAIA import: Ingrid Solheim from the file next to the existing Ingrid Solheim at Brekkvik Valves AS, with Skip, Create anyway and Update existing buttons.'
 coverAlt: 'Three close-ups of the GAIA import: a column mapping that matches headers like Acct Name and Tel / Mob to GAIA fields, a probable duplicate with Skip, Create anyway and Update existing buttons, and a contact flagged for an invalid email address.'
 disclosure: mock-data
 draft: true
@@ -34,35 +31,25 @@ The standard fix is a column-mapping wizard. It's the screen every CRM has, wher
 <Figure
   src={planMapping}
   alt="The Plan step of the GAIA import for mock-contacts.csv, about 7 contacts detected. A column mapping table matches headers from the file to GAIA fields: Acct Name to Company name, Contact (Primary) to Full name, Title/Role to Job title, Tel / Mob to Phone, E-mail to Email, Ctry to Country, HQ to City and Web to Company links. Owner and Notes are ignored. A note reads 'Nothing is imported until you press Start.'"
+  caption="What a real export looks like next to what GAIA expects."
   mock
 />
-
-{/* TODO(mattias): caption. Your idea: "What a real export looks like next to what GAIA expects." */}
 
 ## Constraints
 
 - Nothing touches live data until the user says so. A wrong guess in someone's contact book is worse than a slow import.
 - AI cost can't grow with the file. A 5,000-row sheet must not mean 5,000 model calls.
-- Every imported record traces back to its row, or its card, in the source file.
 - Data stays in an EU region, and the cost of each import is visible per organisation.
 
 ## Approach
 
 You drop a file into the import window. It can be a CSV, an Excel file, a vCard, a PDF, or a photo taken on your phone.
 
-A plain parser reads it first, with no AI involved. It detects the delimiter and encoding, numbers every row and stops at the row cap before anything is spent. Then a planning agent looks at the columns and a sample of rows. If something is unclear it asks, but only with quick-reply options, and only a few times. Then it runs.
+A plain parser reads it first, with no AI involved. It detects the delimiter and encoding, numbers every row and stops at the row cap before anything is spent. Then a planning agent looks at the columns and a sample of rows. If something is unclear it asks, but only with quick-reply options, and only a few times. Then the import starts.
 
 For spreadsheets the model writes the mapping once and normal code applies it to every row. Model cost depends on the columns, not the number of rows. Photos and PDFs go through a separate vision path. A background worker does the job and streams progress to the screen.
 
 Everything lands in a staging area, not in GAIA. The review screen shows what's new, what looks like a duplicate and what needs attention. The user decides, and only then does anything get saved.
-
-I split the build into 12 PR-sized pieces, each with a written handoff, and built each one in a single Claude Code session.
-
-{/* TODO(mattias): Figure, mock. The flow: upload → plan → run → review → commit, with the two human steps marked.
-    Caption idea: "The user steps in twice. Once to answer questions, once to approve." */}
-
-{/* TODO(mattias): Figure, mock. The clarifying question card with quick-reply options.
-    Caption idea: "The agent asks with options, never an open text box." */}
 
 ## Decisions
 
@@ -81,27 +68,24 @@ Auto-merging would save clicks. A wrong merge quietly destroys a contact someone
 <Figure
   src={reviewDuplicates}
   alt="The Review step of the GAIA import on the Duplicates tab, with 3 probable matches to decide. Each row puts the contact from the file next to the existing contact, such as Ingrid Solheim at brekkvik.example against the same name at Brekkvik Valves AS, with Skip, Create anyway and Update existing buttons. A warning reads '3 probable duplicates need a decision before you can import'."
+  caption="Plain rules find the match. The user makes the call."
   mock
 />
-
-{/* TODO(mattias): caption */}
 
 ## When it broke
 
 I shipped it behind a flag, first to our own organisation and then to a few customer testers. The first round of feedback was about real life, not AI. iPhone photos arrived as HEIC. Images saved from WhatsApp were .jpeg, not .jpg. And a photo of four business cards gave all four people the same company. I fixed that one with a prompt rule.
 
-In August the worst report came in. Imports felt slow, the second one froze, and then nobody in that organisation could import anything. I went through the trace for that session. There were three bugs, and the model caused none of them.
+In August the worst report came in. Imports felt slow, the second one froze, and after that nobody in the organisation could import anything. I went through the trace for that session and found three bugs. The model caused none of them.
 
-- The model had read all four cards correctly. The commit lost it. Every card in one photo shared a single row reference, so the last company written won. The review screen read the same lookup, so the preview agreed with the wrong answer. My prompt rule from July could never have helped.
-- The "slowness" was the progress counter sitting at 0 for 21 seconds. Progress was only saved at the end of a batch, and one photo is one batch. Now it updates for each contact.
-- The real blocker was an 819-row commit. It made two database round-trips per record inside one transaction, more than 1,600 statements holding one of ten pool connections for minutes. It failed, rolled back and left the session stuck in review. A stuck session blocks every new import for the organisation.
+- The model had read all four cards correctly, and the commit lost it. Every card in one photo shared the same row reference, so the last company written won. The review screen used the same lookup, so the preview showed the wrong company too. My prompt rule from July could never have fixed it.
+- The "slowness" was the progress counter stuck at 0 for 21 seconds. Progress only saved at the end of a batch, and one photo is one batch. Now it updates after every contact.
+- The real blocker was the commit. An 819-row import wrote its records one by one inside a single transaction, more than 1,600 statements. It ran for minutes, failed, rolled back and left the session stuck in review. A stuck session blocks every new import in that organisation.
 
-I rewrote the commit as two batched statements that check the mapping explicitly, and made stuck sessions possible to discard or recover. On 28 August the flag came off and every organisation got the import.
-
-<Metric label="Statements per 40-row commit" before="80" after="2" />
+I rewrote the commit as two batched statements and made stuck sessions possible to discard or recover. On 28 August the flag came off and every organisation got the import.
 
 ## Next
 
-There is no bulk undo yet. If someone imports 800 wrong contacts, they delete them one by one. That's the first thing I'd build next. After that I'd log how often users override the planner's guesses, to learn which questions it can stop asking.
+There's no bulk undo yet. Someone who imports 800 wrong contacts has to delete them one at a time, so that's the first thing I'd build. After that I'd log every time a user overrides the planner's guess, to see which questions it could stop asking.
 
-Since then, when an AI feature gets something wrong, I read what happens after the model returns before I touch the prompt.
+When an AI feature gets something wrong now, I read what the code does with the model's output before I touch the prompt. In this import the model was the part that got it right.

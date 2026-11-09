@@ -29,7 +29,7 @@
     pointer-events: none;
   }
 
-  /* Glass: a thin tint of the page over a blur of whatever passes behind, light gathering at its edges */
+  /* Glass: a tint of the page over a blur of whatever passes behind, light gathering at its edges */
   .dock-glass {
     position: relative;
     isolation: isolate;
@@ -84,6 +84,15 @@
   .dock-nav {
     flex: 1;
     min-width: 0;
+  }
+
+  /* Each glass piece is its own transition layer, so it stays above the page as the page changes */
+  .dock-nav {
+    view-transition-name: dock-nav;
+  }
+
+  .dock-toggle {
+    view-transition-name: dock-toggle;
   }
 
   .dock-list {
@@ -190,5 +199,21 @@
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
+  }
+}
+
+/* A transition snapshot can't see behind itself, so its layer carries the blur while the page changes */
+::view-transition-group(dock-nav),
+::view-transition-group(dock-toggle) {
+  border-radius: 999px;
+  -webkit-backdrop-filter: blur(var(--dock-blur)) saturate(var(--dock-saturate));
+  backdrop-filter: blur(var(--dock-blur)) saturate(var(--dock-saturate));
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  ::view-transition-group(dock-nav),
+  ::view-transition-group(dock-toggle) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

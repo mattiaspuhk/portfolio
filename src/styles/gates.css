@@ -59,7 +59,7 @@
     scroll-snap-align: start;
   }
 
-  /* The start month, signed on the rail. Black on yellow: this way to the project */
+  /* The start month, signed on the rail. Dark ink on the radar band's orange: this way to the project */
   .gate-date {
     position: absolute;
     top: 0;
@@ -71,7 +71,7 @@
     min-width: 6.5em; /* fits the widest month, so every sign is the same size */
     padding-inline: 0.5rem;
     border-radius: var(--radius-sm);
-    background: var(--apron-tag);
+    background: var(--gate-sign);
     color: var(--apron-tag-ink);
     font-size: var(--text-xs);
     font-weight: 600;
@@ -87,23 +87,15 @@
     box-shadow: var(--screen-shadow);
   }
 
-  /* Two mounts from the rail */
-  .screen::before,
-  .screen::after {
+  /* One mount from the rail, centred */
+  .screen::before {
     content: '';
     position: absolute;
     bottom: 100%;
+    left: calc(50% - 1px);
     width: 2px;
     height: calc(var(--drop) - var(--rail-y));
     background: color-mix(in oklab, var(--color-text) 30%, var(--color-bg));
-  }
-
-  .screen::before {
-    left: 22%;
-  }
-
-  .screen::after {
-    right: 22%;
   }
 
   .screen-bar {
@@ -240,7 +232,7 @@
  * focused or pressed, so only one monitor ever carries the name.
  *
  * As the rail scrolls into view the monitors come on along it, newest first: the date sign drops
- * onto the rail, the monitor swings to rest from its mounts, and its caption follows. Tied to
+ * onto the rail, the monitor swings to rest from its mount, and its caption follows. Tied to
  * scroll, so "See my work" plays it on the way down. The screenshots themselves don't animate. CSS only; without scroll-driven animations or with reduced motion, it's all just there.
  */
 @layer components {
@@ -273,7 +265,7 @@
         animation-range: entry var(--at) entry calc(20% + var(--at));
       }
 
-      /* Swings from the rail, where the mounts hang */
+      /* Swings from the rail, where the mount hangs */
       .screen {
         transform-origin: 50% calc(var(--rail-y) - var(--drop));
         animation-name: gate-swing;

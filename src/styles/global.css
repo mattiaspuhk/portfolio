@@ -44,6 +44,11 @@
   navigation: auto;
 }
 
+/* The overlay lets clicks through to the new page, so you can pick another page mid-transition */
+::view-transition {
+  pointer-events: none;
+}
+
 ::view-transition-group(*) {
   animation-duration: var(--dur-slow);
   animation-timing-function: cubic-bezier(0.2, 0.75, 0.15, 1);

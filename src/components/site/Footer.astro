@@ -1,28 +1,53 @@
 ---
+// The sign-off at the foot of every page: the email address at near-display size, the other ways
+// to get in touch under it, and the hero's storm in a strip of its own underneath, so the site
+// opens and closes in the same weather. The storm (RadarBand) stays below the words and runs to the
+// bottom of the window, under the dock.
+import RadarBand from '@/components/apron/RadarBand.astro';
+import Arrow from '@/components/site/Arrow.astro';
 import { site } from '@/config/site';
 
 type Props = Record<string, never>;
 
-const links = [
-  ...(site.email ? [{ label: site.labels.email, href: `mailto:${site.email}` }] : []),
-  ...site.socials.filter((social) => social.href),
-];
+const [user, domain] = site.email ? site.email.split('@') : [];
+const links = site.socials.filter((social) => social.href);
 ---
 
-<footer class="site-footer mx-auto w-full max-w-(--page-width) px-(--gutter) py-(--space-lg)">
-  {
-    links.length > 0 && (
-      <nav aria-label={site.labels.footerNav}>
-        <ul class="flex flex-wrap gap-(--space-md) text-sm text-muted">
-          {links.map((link) => (
-            <li>
-              <a href={link.href} class="hover:text-text">
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    )
-  }
+<footer class="site-footer">
+  <div class="footer-inner">
+    <h2 class="apron-head">{site.labels.footerNav}</h2>
+    {
+      site.email && (
+        <a class="signoff" href={`mailto:${site.email}`}>
+          {user}@<wbr />
+          <span class="whitespace-nowrap">
+            {domain}
+            <Arrow direction="up-right" class="signoff-arrow" />
+          </span>
+        </a>
+      )
+    }
+    <div class="footer-row">
+      {
+        links.length > 0 && (
+          <nav aria-label={site.labels.footerNav}>
+            <ul class="footer-links">
+              {links.map((link) => (
+                <li>
+                  <a href={link.href} rel="me">
+                    {link.label}
+                    <Arrow direction="up-right" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+      <p class="footer-colophon">© {new Date().getFullYear()} {site.name}</p>
+    </div>
+  </div>
+  <div class="footer-weather">
+    <RadarBand mode="footer" />
+  </div>
 </footer>

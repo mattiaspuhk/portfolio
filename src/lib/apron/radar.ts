@@ -54,6 +54,9 @@ export const BAND: Squall = { from: 0.8, to: 0.2, spread: 0.3 };
 /** Over the whole hero: up from below the words on the left to past their end on the right */
 export const HERO: Squall = { from: 0.98, to: 0.1, spread: 0.34 };
 
+/** Under the footer, measured from below its thinning band to the page bottom: low on the left, rising a little to the right */
+export const FOOTER: Squall = { from: 0.7, to: 0.3, spread: 0.36 };
+
 /** Return strength for a scattered cell, then for levels 1 to 4. */
 export type Thresholds = readonly [number, number, number, number, number];
 
@@ -135,27 +138,36 @@ export interface RadarField {
   cells: Uint8Array;
 }
 
-/** The reference band at the start of the drift. */
-export function radarField(seed = 7): RadarField {
-  const { cols, rows } = REFERENCE;
+/** A band at the start of the drift: the reference band, or another line and size with the same mix of levels. */
+export function radarField(seed = 7, squall: Squall = BAND, { cols, rows } = REFERENCE): RadarField {
   const sky = weather(seed);
   const levels = thresholds(sky);
   const cells = new Uint8Array(cols * rows);
   for (let j = 0; j < rows; j++) {
     for (let i = 0; i < cols; i++) {
-      const line = sky.centre(BAND, (i + 0.5) / cols, i, 0);
-      const f = sky.strength(i, j, (j + 0.5) / rows, line, BAND.spread, 0);
+      const line = sky.centre(squall, (i + 0.5) / cols, i, 0);
+      const f = sky.strength(i, j, (j + 0.5) / rows, line, squall.spread, 0);
       cells[j * cols + i] = sky.level(f, i, j, 0, levels);
     }
   }
   return { cols, rows, cells };
 }
 
-/** The no-JS drawing: one path per value (1–5), and hairlines between the cells. */
+/** The no-JS drawing: one path per value (1–5), cells in a row merged into runs, and hairlines between the cells. */
 export function fieldPaths({ cols, rows, cells }: RadarField) {
-  const levels = [1, 2, 3, 4, 5].map((value) =>
-    Array.from(cells, (v, k) => (v === value ? `M${k % cols} ${Math.floor(k / cols)}h1v1h-1z` : '')).join(''),
-  );
+  const levels = [1, 2, 3, 4, 5].map((value) => {
+    let d = '';
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < cols; i++) {
+        if (cells[j * cols + i] !== value) continue;
+        let run = 1;
+        while (i + run < cols && cells[j * cols + i + run] === value) run++;
+        d += `M${i} ${j}h${run}v1h-${run}z`;
+        i += run - 1;
+      }
+    }
+    return d;
+  });
   const grid =
     Array.from({ length: cols + 1 }, (_, i) => `M${i} 0v${rows}`).join('') +
     Array.from({ length: rows + 1 }, (_, j) => `M0 ${j}h${cols}`).join('');

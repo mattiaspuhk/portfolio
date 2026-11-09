@@ -3,7 +3,7 @@
 # Images go in src/assets/work/vibecheck/ and are imported at the top of this file.
 title: 'VibeCheck by Visa'
 summary: 'A checkout-time check that shows Gen Z what an impulse buy costs in the things they care about, built in a five-day design sprint for Visa.'
-tldr: 'VibeCheck by Visa shows a Gen Z cardholder what a non-essential purchase costs in the things they care about, just before they pay. We took it from an open brief to a modelled system and a clickable prototype in five days.'
+tldr: 'VibeCheck by Visa shows a Gen Z cardholder what a non-essential purchase costs in the things they care about, just before they pay. We took it from an open brief to a written spec and a clickable prototype in five days.'
 order: 3
 org: 'LSE Sprint Week · Visa brief'
 # Team from the source: Group G, MSc students with a rotating daily facilitator and one Decider.
@@ -11,17 +11,13 @@ role: 'Led the research, UX spec and prototype build'
 period:
   start: 2026-11-02
   end: 2026-11-06
-stack: ['Kiro', 'PlantUML', 'HTML/CSS/JS', 'Mural']
+stack: ['Kiro', 'HTML/CSS/JS', 'Mural']
 metrics:
   - label: 'Open brief to clickable prototype'
     after: '5 days'
-  - label: 'Design gaps found before build'
-    after: '9'
-  - label: 'Times the problem changed'
-    after: '3'
 cover: ../../assets/work/vibecheck/cover.png
 thumb: ../../assets/work/vibecheck/thumb.png
-thumbAlt: 'TODO(mattias)'
+thumbAlt: 'The VibeCheck checkout card, reading £45 = 2 gig tickets.'
 coverAlt: 'Three phone screens: a VibeCheck welcome screen reading Spend on your vibe, a checkout sheet reading £45 = 2 gig tickets, and a home screen with Maya''s top three priorities.'
 disclosure: concept
 draft: true
@@ -38,68 +34,30 @@ import desktopCheckout from '@/assets/work/vibecheck/desktop-checkout.png';
 
 ## Problem
 
-Visa asked: what's a valuable problem to solve for Gen Z in the financial space? It added two conditions: consider the AI experience paradigm, and consider the current ecosystem and partners.
+Visa's brief was open. What's a valuable problem to solve for Gen Z in the financial space? It asked us to consider the AI experience and the current ecosystem of partners.
 
-The brief named a user but not a customer. Three parties had different stakes:
-
-- **Gen Z cardholders** want to enjoy spending now, as trends push them to, without losing financial security.
-- **Issuing banks** own the account and the customer, and earn from lending.
-- **Visa** runs the network and gains from trusted, growing card use.
-
-Our first hard question on Monday was whose interest we were designing for. As a product engineer, I treat that as the first scoping decision: the answer sets the owner, the data you can use and the success metric.
-
-The problem changed three times in three days. Each change made it narrower and easier to build against.
-
-| Day | What we believed | What moved us |
-| --- | --- | --- |
-| Wed | Priorities are the things people love to spend on: travel, festivals, fitness | "Values" felt moralising and was hard to read from spending. We also added one wishlist across all shops, so the check has something concrete to compare against. |
-| Tue | Trend and social-media spending crowds out what Gen Z actually care about | The root definition forced us to name an owner: the card issuer, with Visa as network partner. |
-| Mon | AI could capture a user's values and steer spending toward them | Our rich picture showed the tension was at the moment of spending, not in the credit product. |
-| Mon | Gen Z credit products (BNPL, credit cards) are the problem space | Credit explained how Gen Z pay, not why they overspend. |
-
-We used Soft Systems tools to get there: a rich picture of the whole problem, CATWOE, root definitions, then eight "How Might We" questions and a dot vote. Two of those HMWs became design rules: show the gap without shaming, and let users define what matters without feeling profiled.
-
-The target we committed to for the rest of the week:
+By the third day we had narrowed it to one target.
 
 > Show Gen Z what an impulse buy costs them in terms of what they really care about, right before they pay.
 
 ## Constraints
 
-The most important design choices came from what the system could and couldn't know. Each constraint below changed where the product runs or what it is allowed to do.
+Most of the design came from five facts about what the system can and can't know.
 
-| Constraint | What it meant for the design |
-| --- | --- |
-| Card data shows where you spent, not what you bought | Item details come from the checkout basket (in an app, at online checkout or inside an AI agent), not from card transactions. |
-| Card authorisation happens after the decision is made | The check must run before payment, inside the checkout flow. A statement insight is too late. |
-| Inferring interests from spending counts as profiling under UK GDPR | Consent is a required step in setup. The AI suggests priorities; the user confirms, edits or deletes them. |
-| Nudges that feel judgemental get ignored | The check never blocks a purchase. It always offers buy, save to wishlist or wait 24 hours. |
-| Social media shapes both impulses and aspirations | The system can't decide what is a "real" priority. The user does. |
-| Visa is a network, not a bank | The issuer owns the customer and holds the money. Visa supplies the feature ready-made, so banks add it without building it. |
-| More shopping is done by AI agents | The same priority check attaches to an agent's payment token through Visa's agent spend controls. |
-
-<Figure
-  src={pairConsentSpotted}
-  alt="Two phone screens. Left: 'Want suggestions from your spending?', with what VibeCheck looks at (shop names, amounts and dates from the last 12 months), what it doesn't see (what you bought, unless a shop shares your basket), and an opt-in toggle. Right: 'Here's what we spotted. You decide.', listing Live music, Fitness, Eating out and Travel, each with That's me and Not me buttons."
-  mock
-/>
+- Card data shows where you spent, not what you bought.
+- Card authorisation happens after the decision to buy is already made.
+- Inferring someone's interests from their spending counts as profiling under UK GDPR.
+- Nudges that feel judgemental get ignored.
+- Visa is a network, not a bank. The issuer owns the customer and holds the money.
 
 ## Approach
 
-VibeCheck is three components that share one engine: a comparison of what you're about to buy against what you said matters. We called it a platform, not an assistant.
+VibeCheck compares what you're about to buy with the priorities you've set and your wishlist. The checkout check is the core of it, and in the prototype it runs like this.
 
-| Component | What it does | How |
-| --- | --- | --- |
-| Priority profiler | Turns past spending and loose interests into a confirmed priority list and one wishlist | AI analysis of transaction history, a short guided chat, and a save button that works in any shop or app |
-| Checkout check | Shows what a non-essential purchase costs in the user's own priorities and gives an opinion | AI compares the basket with the priority list and wishlist just before payment |
-| Agent guardrails | Makes AI shopping agents buy in line with the cardholder's priorities | Priority-based rules on the agent's payment token, plus wishlist price watching across shops |
-
-The checkout check is the core of the product. In the prototype it runs like this:
-
-1. The user reaches checkout in any app or shop.
-2. Before payment, VibeCheck compares the basket with their priorities and wishlist.
-3. It shows the trade-off in their own terms: "this £45 = 2 nights in Lisbon", or "this is on your wishlist and £10 cheaper than last week".
-4. Two optional views add context: **Forecast** (how the purchase is likely to feel later) and **Worth It?** (the user's own ratings of similar past purchases).
-5. The user picks buy, save to wishlist, or wait 24 hours. Buying is always one tap away.
+1. Before payment, VibeCheck compares the basket with the user's priorities and wishlist.
+2. It shows the trade-off in their own terms, like "this £45 = 2 nights in Lisbon" or "this is on your wishlist and £10 cheaper than last week".
+3. Two optional views add context. Forecast shows how the purchase is likely to feel later, and Worth It? shows the user's own ratings of similar past purchases.
+4. The user picks buy, save to wishlist, or wait 24 hours. Buying is always one tap away.
 
 <Figure
   src={pairBagCheck}
@@ -113,41 +71,7 @@ The checkout check is the core of the product. In the prototype it runs like thi
   mock
 />
 
-### From storyboard to system design
-
-We modelled the system before building it, so the UI, the diagrams and the AI-generated code would agree. The rule was simple: every screen maps to a use case and a class, or something changes.
-
-**Use case diagram.** One system boundary with three packages, matching the three components. The cardholder and the AI shopping agent are primary actors. The issuer bank, merchant, AI model provider and Visa network are secondary actors. Three modelling choices carry product decisions:
-
-- Forecast, Worth It?, Save to wishlist and Wait 24 hours `<<extend>>` the base "Check purchase before paying" use case. The model itself says the check never blocks: buying stays the normal path.
-- "Compare basket with priorities and wishlist" is `<<include>>`d by both the human checkout and the agent's purchase. One engine serves both, which ties agent guardrails to the core idea.
-- Setting up priorities always includes consenting to spending analysis, so the GDPR requirement is part of the model, not a footnote.
-
-**Class diagram.** Core classes include Cardholder, PriorityProfile, Priority, Wishlist, WishlistItem, Basket, CheckoutCheck, Decision and PurchaseRating. Rating a past purchase became its own use case because Worth It? needs that data to exist.
-
-The diagrams were written in PlantUML, so the same text went straight into Kiro as part of the build spec.
-
-{/* TODO(mattias): add the use case and class diagrams as figures if you can share them. */}
-
-### Build strategy
-
-We built the riskiest, most valuable slice first: the checkout sheet. It is the climax of the demo, and every other screen exists to feed it.
-
-**Where to differentiate.** Our Wardley map placed card data, payment rails and AI models as commodities to reuse. The differentiation is the priority profile and the translation of a price into the user's own priorities. That is where we spent design effort.
-
-{/* TODO(mattias): confirm the Wardley map conclusion matches your team's map. */}
-
-**Build order.**
-
-1. Seed data for one persona, Maya: her priorities, wishlist, four past ratings and a £45 basket.
-2. The checkout sheet and its variants, clickable on their own.
-3. Onboarding and consent.
-4. The everyday app: home, priorities, wishlist, history and rating.
-5. Agent screens, only once steps 1–4 worked.
-
-**Spec-driven prototyping.** We used Kiro, an agentic AI development tool, from a written spec rather than ad-hoc prompts. The spec covered screens, copy, states and seed data, plus the two PlantUML diagrams. The target was a clickable mobile prototype as a single-page app in plain HTML, CSS and JavaScript.
-
-**Demo path.** We scripted the 2-minute video through six screens: confirm priorities, reach checkout, see the trade-off, choose to wait 24 hours, get the reminder, and find the item on the wishlist.
+We built the checkout sheet first, because every other screen exists to feed it. The prototype was built in Kiro, an agentic coding tool, from a written spec instead of ad-hoc prompts. The spec covered screens, copy, states and seed data.
 
 <Figure
   src={pairWaitReminder}
@@ -157,19 +81,19 @@ We built the riskiest, most valuable slice first: the checkout sheet. It is the 
 
 ## Decisions
 
-Most of our decisions traded control for trust. We kept the user in charge because a tool that feels like a judge gets switched off.
-
-<Decision title="Never block a purchase" options={["Hard spending limits", "Never block a purchase"]} chose="Never block a purchase">
-Blocking reads as judgement. Friction plus choice keeps people using it.
+<Decision title="Check before payment, from the basket" options={["Insights on the statement afterwards", "A check inside checkout, from basket data"]} chose="A check inside checkout, from basket data">
+Card data has no line items, and by the time a payment is authorised the decision is already made. A statement insight would only need data the issuer already has, but it arrives too late to change anything. So the check runs inside checkout and reads the basket the shop shares, in an app, at online checkout or inside an AI agent. The cost is that it only works where a shop shares its basket.
 </Decision>
 
-<Decision title="Priorities, not values" options={["A values-based profile", "Priorities, not values"]} chose="Priorities, not values">
-Priorities map to real purchases and feel less moralising.
+<Decision title="AI suggests, the user confirms" options={["Infer the profile from spending", "AI suggests priorities, the user confirms each one"]} chose="AI suggests priorities, the user confirms each one">
+Inferring interests from spending is profiling under UK GDPR. So consent is a required step in setup, and the AI only suggests priorities. The user confirms, edits or deletes each one. Setup gets longer, and that's the price.
 </Decision>
 
-<Decision title="AI suggests, user confirms" options={["A fully inferred profile", "AI suggests, user confirms"]} chose="AI suggests, user confirms">
-Feeds shape what people think they want, and inference is profiling under GDPR.
-</Decision>
+<Figure
+  src={pairConsentSpotted}
+  alt="Two phone screens. Left: 'Want suggestions from your spending?', with what VibeCheck looks at (shop names, amounts and dates from the last 12 months), what it doesn't see (what you bought, unless a shop shares your basket), and an opt-in toggle. Right: 'Here's what we spotted. You decide.', listing Live music, Fitness, Eating out and Travel, each with That's me and Not me buttons."
+  mock
+/>
 
 <Figure
   src={pairPrioritiesWishlist}
@@ -177,8 +101,8 @@ Feeds shape what people think they want, and inference is profiling under GDPR.
   mock
 />
 
-<Decision title="Check before payment, from basket data" options={["Insights on the statement afterwards", "Check before payment, from basket data"]} chose="Check before payment, from basket data">
-The statement is too late, and card data has no line items.
+<Decision title="Never block a purchase" options={["Hard spending limits", "Never block, always offer a choice"]} chose="Never block, always offer a choice">
+Nudges that feel judgemental get ignored, and a blocked payment is as judgemental as it gets. The check always offers buy, save to wishlist or wait 24 hours, and buying stays one tap away. That means the check can only persuade. It never stops anyone.
 </Decision>
 
 <Figure
@@ -187,46 +111,6 @@ The statement is too late, and card data has no line items.
   mock
 />
 
-<Decision title="Issuer owns, Visa supplies" options={["A standalone Visa app", "Issuer owns, Visa supplies"]} chose="Issuer owns, Visa supplies">
-Visa holds no accounts. Issuers bring the customers; "by Visa" keeps Visa in the relationship.
+<Decision title="Issuer owns, Visa supplies" options={["A standalone Visa app", "A feature issuers add to their own apps"]} chose="A feature issuers add to their own apps">
+Visa is a network, not a bank. The issuer owns the customer and holds the money. So Visa supplies the feature ready-made and banks add it without building it, and "by Visa" keeps Visa's name in front of the cardholder. Visa gives up owning the relationship with the user.
 </Decision>
-
-<Decision title="Agents reuse the same check" options={["A separate agent product", "Agents reuse the same check"]} chose="Agents reuse the same check">
-One engine, one source of truth for the user's priorities.
-</Decision>
-
-<Decision title="Agent screens built last" options={["Building every component at once", "Agent screens built last"]} chose="Agent screens built last">
-Protects the core demo if time runs out.
-</Decision>
-
-## When it broke
-
-We appointed a UML checker. We built a matrix of screens against use cases and classes. It surfaced nine gaps, for example:
-
-- No `AgentRule` class for the agent screens
-- No `currentPrice` or status on `WishlistItem` for price-drop alerts
-- No `remindAt` time for the 24-hour wait
-- One `consentGiven` flag where the UI asked for three separate opt-ins
-
-{/* TODO(mattias): how the nine gaps were fixed, anything Kiro got wrong, and the Dragon's Den feedback or result. */}
-
-## Next
-
-The prototype tests desirability. Before building further, I'd prove the check changes behaviour and that basket data is actually reachable.
-
-| Metric | What it tells us |
-| --- | --- |
-| Worth It? ratings after a check vs without | Whether people regret fewer purchases, the core outcome |
-| Share of wishlist items bought from savings, not BNPL | Whether planned buying replaces instant credit |
-| Mute or dismiss rate on the check | Early warning that it feels judgemental |
-| Taps to save an item to the wishlist | Whether capture is truly one tap |
-| Retention of cardholders using the feature | The issuer's business case |
-
-Next steps:
-
-- Run a quick test: five people name their top three priorities, sort their last ten transactions into priority, trend or essential, then react to one mock trade-off.
-- Spike where basket data really comes from: in-app checkout, merchant integration or agent context.
-- Test two tones of the trade-off message against the mute rate.
-- Answer the open HMW: how to make the check worthwhile for merchants, so they don't resist the friction.
-
-{/* TODO(mattias): link to the prototype and the 2-minute video, and check your teammates are happy to be referenced. */}

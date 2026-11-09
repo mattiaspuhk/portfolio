@@ -16,7 +16,7 @@ interface Props {
 
 const { entry } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(entry);
-assertBeats(headings, entry.filePath ?? entry.id);
+const beats = assertBeats(headings, entry.filePath ?? entry.id, entry.data.kind);
 const { prev, next } = await getAdjacentWork(entry.id);
 ---
 
@@ -25,6 +25,7 @@ const { prev, next } = await getAdjacentWork(entry.id);
   minutesRead={remarkPluginFrontmatter.minutesRead}
   prev={prev}
   next={next}
+  beats={beats}
 >
   <Content components={mdxComponents} />
 </CaseStudyLayout>

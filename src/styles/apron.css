@@ -176,8 +176,6 @@
   /* ---------- Section heads ---------- */
 
   .apron-head {
-    padding-top: var(--space-sm);
-    border-top: 1.5px solid var(--color-text);
     font-family: var(--font-display);
     font-weight: 400;
     font-size: var(--text-headline);
@@ -219,19 +217,13 @@
     transition-duration: var(--dur-base);
   }
 
-  /* Selected work follows the hero without a rule: the storm thins down onto its head, and the gate
-     rail just under it does the rule's job. It sits closer to the hero than the other sections sit
-     to each other, so the two read as one move. */
+  /* Selected work sits closer to the hero than the other sections sit to each other, so the two
+     read as one move. */
   .home-work {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
     margin-top: calc(var(--space-2xl) * -0.5);
-  }
-
-  .apron-head.on-rail {
-    padding-top: 0;
-    border-top: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -722,8 +714,7 @@
 
 /*
  * Hero motion. "See my work" glides down (smooth scrolling is set in global.css) and its arrow
- * nudges the way it goes. As the hero scrolls away, the words dissolve into the storm: opacity and
- * blur only, never a move, because the radar measures the words' boxes to keep clear air round them.
+ * nudges the way it goes.
  */
 @layer components {
   .hero-link svg {
@@ -741,28 +732,126 @@
   }
 
   /* Lands with the head a little below the top of the window */
-  #home-work {
+  #home-work,
+  #home-now {
     scroll-margin-block-start: var(--space-lg);
   }
+}
 
-  @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .hero {
-        view-timeline: --hero block;
-      }
+/* ---------- Footer: the sign-off, with the storm rising at the foot of the page ---------- */
 
-      .hero > :is(.headline, .hero-intro, .hero-link) {
-        animation: hero-dissolve linear both;
-        animation-timeline: --hero;
-        animation-range: exit 25% exit 70%;
-      }
+@layer components {
+  /* The footer runs on under the dock, to the bottom of the window */
+  .site-footer {
+    margin-top: var(--space-2xl);
+    margin-bottom: calc(-1 * var(--dock-clearance));
+  }
 
-      @keyframes hero-dissolve {
-        to {
-          opacity: 0.08;
-          filter: blur(6px);
-        }
-      }
+  /* The storm's own strip under the words: it thins out at the strip's top and never reaches them */
+  .footer-weather {
+    position: relative;
+    isolation: isolate;
+    height: calc(3 * var(--space-2xl) + var(--dock-clearance));
+    margin-top: var(--space-lg);
+  }
+
+  .footer-inner {
+    position: relative;
+    width: 100%;
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* The address at the hero's weight, sized to fit the column on one line from tablet up; on a
+     phone it breaks after the @ */
+  .signoff {
+    display: inline-block;
+    margin-top: var(--space-md);
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--text-signoff);
+    line-height: var(--text-display--line-height);
+    letter-spacing: -0.045em;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.12em;
+    transition: text-decoration-color var(--dur-slow) var(--ease);
+  }
+
+  .signoff-arrow {
+    display: inline-block;
+    width: 0.42em;
+    height: 0.42em;
+    margin-left: 0.06em;
+    vertical-align: 0.5em;
+    color: var(--color-muted);
+    transition:
+      color var(--dur-slow) var(--ease),
+      translate var(--dur-slow) var(--ease);
+  }
+
+  .signoff:is(:hover, :focus-visible) {
+    text-decoration-color: currentColor;
+    transition-duration: var(--dur-base);
+  }
+
+  .signoff:is(:hover, :focus-visible) .signoff-arrow {
+    color: var(--color-text);
+    translate: 0.06em -0.06em;
+    transition-duration: var(--dur-base);
+  }
+
+  .footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-md);
+    margin-top: var(--space-lg);
+    padding-top: var(--space-sm);
+    border-top: var(--border-width) solid var(--color-border);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-lg);
+  }
+
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    text-decoration: underline;
+    text-decoration-color: var(--color-border);
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color var(--dur-slow) var(--ease);
+  }
+
+  .footer-links a:is(:hover, :focus-visible) {
+    text-decoration-color: currentColor;
+    transition-duration: var(--dur-base);
+  }
+
+  .footer-links svg {
+    width: 0.875em;
+    height: 0.875em;
+    color: var(--color-muted);
+  }
+
+  .footer-colophon {
+    color: var(--color-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .signoff,
+    .signoff-arrow,
+    .footer-links a {
+      transition: none;
     }
   }
 }

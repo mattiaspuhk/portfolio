@@ -1,12 +1,12 @@
 ---
-import { BEATS } from '@/lib/beats';
-
 interface Props {
   /** aria-label for the nav landmark. */
   label: string;
+  /** Beats present on this page, in order. */
+  beats: { label: string; slug: string }[];
 }
 
-const { label } = Astro.props;
+const { label, beats } = Astro.props;
 ---
 
 <nav
@@ -16,7 +16,7 @@ const { label } = Astro.props;
 >
   <ol class="flex gap-(--space-sm) whitespace-nowrap lg:flex-col lg:gap-(--space-xs)">
     {
-      BEATS.map((beat) => (
+      beats.map((beat) => (
         <li>
           <a
             href={`#${beat.slug}`}

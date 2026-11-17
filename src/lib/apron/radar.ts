@@ -57,6 +57,9 @@ export const HERO: Squall = { from: 0.98, to: 0.1, spread: 0.34 };
 /** Under the footer, measured from below its thinning band to the page bottom: low on the left, rising a little to the right */
 export const FOOTER: Squall = { from: 0.7, to: 0.3, spread: 0.36 };
 
+/** Behind the work palette, measured over its whole field: across the middle, rising to the right, wide enough to fill it */
+export const PATCH: Squall = { from: 0.66, to: 0.34, spread: 0.5 };
+
 /** Return strength for a scattered cell, then for levels 1 to 4. */
 export type Thresholds = readonly [number, number, number, number, number];
 

@@ -5,6 +5,8 @@
 @import './terminal.css';
 @import './gates.css';
 @import './dock.css';
+@import './palette.css';
+@import './work-index.css';
 @import './print.css';
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 

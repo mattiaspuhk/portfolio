@@ -1,0 +1,208 @@
+/*
+ * Work index (WorkIndex.astro): the home page's Selected work as an open index on one sheet of the
+ * dock's glass (the one recipe, dock.css, rounded like a card). Titles in the headline's light face
+ * between faint hairlines, kind and year in quiet columns. The row under the pointer glows with the
+ * hero's halo; with nothing pointed at, the row under keyboard focus; with neither, the first. The
+ * lit row's cover shows on the same glass to the right, as tall as the list, with a line of details
+ * under it. Previews are stacked there and only the lit one shows. CSS only. On phones the covers
+ * drop out and each row carries its thumb.
+ */
+@layer components {
+  .work-index.dock-glass {
+    --preview-w: 19rem;
+    --hairline: color-mix(in oklab, var(--color-text) 10%, transparent);
+    position: relative;
+    padding: var(--space-xs) var(--space-lg);
+    border-radius: calc(var(--radius-lg) * 1.25);
+  }
+
+  .work-index-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 8rem 3rem;
+    align-items: baseline;
+    gap: var(--space-md);
+    padding-block: var(--space-md);
+    border-top: var(--border-width) solid var(--hairline);
+  }
+
+  .work-index-item:first-child .work-index-row {
+    border-top: 0;
+  }
+
+  .work-index-thumb {
+    display: none;
+  }
+
+  .work-index-title {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.5rem, 1rem + 1.6vw, 2.375rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .work-index-kind,
+  .work-index-year {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .work-index-year {
+    text-align: right;
+  }
+
+  /* The halo is off until the row is lit */
+  .work-index-title.halo {
+    color: var(--color-text);
+    transition: color var(--dur-base) var(--ease);
+  }
+
+  .work-index-title.halo::before,
+  .work-index-title.halo::after {
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease);
+  }
+
+  /* Every preview takes the same box: the right of the glass, top and bottom level with the list */
+  .work-index-preview {
+    position: absolute;
+    top: var(--space-xs);
+    bottom: var(--space-xs);
+    right: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    width: var(--preview-w);
+    opacity: 0;
+    translate: 0 0.25rem;
+    pointer-events: none;
+    transition:
+      opacity var(--dur-base) var(--ease),
+      translate var(--dur-base) var(--ease);
+  }
+
+  /* The cover takes whatever height the details leave */
+  .work-index-image {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+    box-shadow: var(--screen-shadow);
+  }
+
+  .work-index-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem var(--space-sm);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .work-index-figure {
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .work-index-figure-label {
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  /* The lit row: under the pointer; else under keyboard focus; else the first one. One at a time,
+     so a focused row doesn't stay lit while the pointer is on another. */
+  .work-index-item:hover .work-index-title.halo,
+  .work-index:not(:has(.work-index-item:hover))
+    .work-index-item:focus-within
+    .work-index-title.halo,
+  .work-index:not(:has(.work-index-item:is(:hover, :focus-within)))
+    .is-first
+    .work-index-title.halo {
+    color: color-mix(in oklab, var(--color-text) 72%, var(--halo-ink));
+  }
+
+  .work-index-item:hover .work-index-title.halo::before,
+  .work-index:not(:has(.work-index-item:hover))
+    .work-index-item:focus-within
+    .work-index-title.halo::before,
+  .work-index:not(:has(.work-index-item:is(:hover, :focus-within)))
+    .is-first
+    .work-index-title.halo::before,
+  .work-index-item:hover .work-index-title.halo::after,
+  .work-index:not(:has(.work-index-item:hover))
+    .work-index-item:focus-within
+    .work-index-title.halo::after,
+  .work-index:not(:has(.work-index-item:is(:hover, :focus-within)))
+    .is-first
+    .work-index-title.halo::after {
+    opacity: 1;
+  }
+
+  .work-index-item:hover .work-index-preview,
+  .work-index:not(:has(.work-index-item:hover)) .work-index-item:focus-within .work-index-preview,
+  .work-index:not(:has(.work-index-item:is(:hover, :focus-within))) .is-first .work-index-preview {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  @media (min-width: 48rem) {
+    .work-index.dock-glass {
+      padding-right: calc(var(--preview-w) + var(--space-lg) + var(--space-xl));
+    }
+
+    /* A short list still leaves room for a cover */
+    .work-index-list {
+      min-height: 18rem;
+    }
+  }
+
+  /* Phones: the list is the index. Previews stay in the page for screen readers only. */
+  @media (max-width: 47.99rem) {
+    .work-index.dock-glass {
+      padding: 0.25rem var(--space-md);
+    }
+
+    .work-index-row {
+      grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--space-sm);
+      padding-block: var(--space-sm);
+    }
+
+    .work-index-thumb {
+      display: block;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 999px;
+      object-fit: cover;
+      background: var(--color-surface);
+    }
+
+    .work-index-kind {
+      display: none;
+    }
+
+    .work-index-preview {
+      top: 0;
+      bottom: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-index-title.halo,
+    .work-index-title.halo::before,
+    .work-index-title.halo::after,
+    .work-index-preview {
+      transition: none;
+    }
+  }
+}

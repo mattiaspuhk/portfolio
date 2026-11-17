@@ -2,7 +2,7 @@
 import { getEntry, render } from 'astro:content';
 import RadarBand from '@/components/apron/RadarBand.astro';
 import Arrow from '@/components/site/Arrow.astro';
-import GateDisplays from '@/components/apron/GateDisplays.astro';
+import WorkIndex from '@/components/work/WorkIndex.astro';
 import { mdxComponents } from '@/components/mdx';
 import { site } from '@/config/site';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -49,7 +49,7 @@ const role = roleAt >= 0 ? labels.introTitleRole : '';
           <h2 id="home-work" class="apron-head" data-radar-clear>
             {labels.work}
           </h2>
-          <GateDisplays entries={work} headingLevel={3} />
+          <WorkIndex entries={work} headingLevel={3} />
         </section>
       )
     }

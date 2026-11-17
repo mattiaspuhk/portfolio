@@ -1,19 +1,26 @@
 ---
-// The storm, full bleed, behind the home page hero or rising under the footer. The storm is a
-// function of place and time (lib/apron/radar.ts); the script below paints it on a canvas at the
-// screen's pixel density, so every cell and gap lands on whole device pixels, drifts it along its
-// line, and lets the pointer warm the cells it passes. Without JS the start of the drift shows as
-// an SVG band along the foot of its section. Decorative.
-import { FOOTER, fieldPaths, radarField } from '@/lib/apron/radar';
+// The storm, full bleed, behind the home page hero or rising under the footer, or as a patch
+// behind the work palette. The storm is a function of place and time (lib/apron/radar.ts); the
+// script below paints it on a canvas at the screen's pixel density, so every cell and gap lands on
+// whole device pixels, drifts it along its line, and lets the pointer warm the cells it passes.
+// Without JS the start of the drift shows as an SVG band along the foot of its section (a patch
+// fills its field instead). Decorative.
+import { FOOTER, PATCH, fieldPaths, radarField } from '@/lib/apron/radar';
 
 interface Props {
   /** `hero` hangs from the top of the page and thins out past the hero's foot; `footer` rises from
-   * the bottom of the page and thins out upward. */
-  mode?: 'hero' | 'footer';
+   * the bottom of the page and thins out upward; `patch` fills the `.palette-field` it sits in and
+   * thins out toward all four of its edges. */
+  mode?: 'hero' | 'footer' | 'patch';
 }
 
 const { mode = 'hero' } = Astro.props;
-const field = mode === 'footer' ? radarField(7, FOOTER, { cols: 280, rows: 32 }) : radarField();
+const field =
+  mode === 'footer'
+    ? radarField(7, FOOTER, { cols: 280, rows: 32 })
+    : mode === 'patch'
+      ? radarField(7, PATCH, { cols: 120, rows: 56 })
+      : radarField();
 const { levels, grid } = fieldPaths(field);
 ---
 
@@ -25,7 +32,11 @@ const { levels, grid } = fieldPaths(field);
 >
   <canvas></canvas>
   <noscript>
-    <svg viewBox={`0 0 ${field.cols} ${field.rows}`} shape-rendering="crispEdges">
+    <svg
+      viewBox={`0 0 ${field.cols} ${field.rows}`}
+      preserveAspectRatio={mode === 'patch' ? 'xMidYMid slice' : undefined}
+      shape-rendering="crispEdges"
+    >
       {levels.map((d, i) => <path class={`radar-level-${i + 1}`} d={d} />)}
       <path class="radar-grid" d={grid} />
     </svg>
@@ -33,7 +44,7 @@ const { levels, grid } = fieldPaths(field);
 </div>
 
 <script>
-  import { FOOTER, HERO, clearAir, thresholds, weather, type Squall } from '@/lib/apron/radar';
+  import { FOOTER, HERO, PATCH, clearAir, thresholds, weather, type Squall } from '@/lib/apron/radar';
 
   // Paints the radar. The canvas covers the hero, which fills the first screen, and reaches up to
   // the top of the page and a little past the hero's foot, so the storm runs off the top and both
@@ -43,19 +54,24 @@ const { levels, grid } = fieldPaths(field);
   // over 600ms. Reduced motion holds the storm still.
   //
   // The footer's storm is the same weather turned over: it rises from the bottom of the page, under
-  // the dock, and thins out upward in its own strip below the words.
+  // the dock, and thins out upward in its own strip below the words. The patch is a piece of the
+  // same weather in a box of its own, behind the work palette's glass, thinning out on every side.
   interface Mode {
     squall: Squall;
     /** The section the storm belongs to; the canvas covers it */
     section: string;
-    /** Cells over which the storm thins out: past the hero's foot, or down from the top of the footer's strip */
+    /** Cells over which the storm thins out: past the hero's foot, down from the top of the
+     * footer's strip, or in from each edge of the patch */
     spill: number;
     /** The hero's storm reaches up to the top of the page and spills past its foot */
     reaches: boolean;
+    /** Which way the storm thins out */
+    thins: 'below' | 'above' | 'around';
   }
   const MODES: Record<string, Mode> = {
-    hero: { squall: HERO, section: '.hero', spill: 16, reaches: true }, // thinning out around the Selected work head
-    footer: { squall: FOOTER, section: '.footer-weather', spill: 10, reaches: false },
+    hero: { squall: HERO, section: '.hero', spill: 16, reaches: true, thins: 'below' }, // thinning out around the Selected work head
+    footer: { squall: FOOTER, section: '.footer-weather', spill: 10, reaches: false, thins: 'above' },
+    patch: { squall: PATCH, section: '.palette-field', spill: 7, reaches: false, thins: 'around' },
   };
 
   for (const band of document.querySelectorAll<HTMLElement>('[data-radar]')) {
@@ -275,10 +291,11 @@ const { levels, grid } = fieldPaths(field);
 
       // The hero's squall is measured from the top of the page to the hero's foot, so it fills the
       // first screen corner to corner and runs off its edges; past the foot it thins out. The
-      // footer's is measured from below its thinning band to the bottom of the page.
+      // footer's is measured from below its thinning band to the bottom of the page. The patch's
+      // fills its whole field.
       const spill = SPILL * pitch;
-      const frame = height - spill;
-      const offset = mode.reaches ? 0 : spill;
+      const frame = mode.thins === 'around' ? height : height - spill;
+      const offset = mode.thins === 'above' ? spill : 0;
       for (let i = 0; i < cols; i++) across[i] = (x0 + (i + 0.5) * pitch) / width;
       for (let j = 0; j < rows; j++) down[j] = (y0 + (j + 0.5) * pitch - offset) / frame;
 
@@ -293,10 +310,12 @@ const { levels, grid } = fieldPaths(field);
       });
       for (let j = 0; j < rows; j++) {
         const cy = y0 + (j + 0.5) * pitch;
-        const edge = smooth((mode.reaches ? height - cy : cy) / spill);
         for (let i = 0; i < cols; i++) {
           const k = j * cols + i;
           const cx = x0 + (i + 0.5) * pitch;
+          const inset =
+            mode.thins === 'below' ? height - cy : mode.thins === 'above' ? cy : Math.min(cx, width - cx, cy, height - cy);
+          const edge = smooth(inset / spill);
           let nearest = Infinity;
           for (const [l, t, r, b] of words) {
             const d = Math.hypot(Math.max(l! - cx, 0, cx - r!), Math.max(t! - cy, 0, cy - b!));

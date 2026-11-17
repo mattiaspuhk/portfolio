@@ -47,7 +47,7 @@ export const site = {
       tldr: 'Short version',
     },
     metric: { before: 'Before', after: 'After' }, // screen-reader text around before → after
-    // The `kind` of a case study, on its gate display.
+    // The `kind` of a case study: the work palette's groups, in this order.
     kind: {
       production: 'In production',
       sprint: 'Sprint week',
@@ -61,6 +61,7 @@ export const site = {
       intro: 'From Estonia 🇪🇪, now in London 🇬🇧 doing an MSc at LSE.',
       seeWork: 'See my work', // the hero's link down to the work section
       work: 'Work',
+      palettePrompt: 'TODO(mattias)', // the static line at the top of the work palette, where a search field would be. Not an input: nothing can be typed.
       proof: 'More from the GAIA rebuild',
       now: 'Now',
     },

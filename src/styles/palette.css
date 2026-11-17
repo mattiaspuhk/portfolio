@@ -1,0 +1,228 @@
+/*
+ * Work palette (WorkPalette.astro): the home page's Selected work as a command palette. It's the
+ * dock's glass (the one recipe in dock.css, rounded less) over a patch of the radar storm. The
+ * result under the pointer or keyboard focus sits under the dock's lens, shows ↵ and lights its
+ * peek on the right; with nothing pointed at, the first result does. Peeks are stacked in the
+ * right column and only the lit one shows. CSS only. On phones the peeks drop out and the list is
+ * the palette.
+ */
+@layer components {
+  .palette-field {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    padding: clamp(var(--space-lg), 6vw, var(--space-2xl))
+      clamp(var(--space-xs), 4vw, var(--space-xl));
+    border-radius: var(--radius-lg);
+    overflow: clip;
+  }
+
+  .palette.dock-glass {
+    --peek-w: 17rem;
+    --pad: var(--space-xs);
+    width: min(100%, 46rem);
+    border-radius: calc(var(--radius-lg) * 1.5);
+  }
+
+  .palette-prompt {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: var(--border-width) solid color-mix(in oklab, var(--color-text) 10%, transparent);
+    font-size: var(--text-lg);
+    color: var(--color-muted);
+  }
+
+  .palette-prompt svg {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .palette-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 19rem;
+    padding: var(--pad);
+    padding-right: calc(var(--peek-w) + var(--pad) * 3);
+  }
+
+  /* The hairline between the results and the peeks */
+  .palette-body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: calc(var(--peek-w) + var(--pad) * 2);
+    border-left: var(--border-width) solid color-mix(in oklab, var(--color-text) 10%, transparent);
+  }
+
+  .palette-group-label {
+    padding: var(--space-sm) var(--space-sm) var(--space-xs);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+  }
+
+  .palette-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .palette-row {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, auto) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 0.375rem var(--space-sm) 0.375rem 0.375rem;
+    border-radius: 999px;
+    transition: background-color var(--dur-base) var(--ease);
+  }
+
+  .palette-row:focus-visible {
+    outline-offset: 0;
+  }
+
+  .palette-thumb {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    object-fit: cover;
+    background: var(--color-surface);
+  }
+
+  .palette-title {
+    overflow: hidden;
+    font-size: var(--text-base);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .palette-org {
+    overflow: hidden;
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .palette-enter {
+    padding: 0.125rem 0.4rem;
+    border-radius: var(--radius-sm);
+    background: var(--dock-lens);
+    font-family: inherit;
+    font-size: var(--text-xs);
+    color: var(--dock-ink);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease);
+  }
+
+  .palette-peek {
+    position: absolute;
+    top: var(--pad);
+    right: var(--pad);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    width: var(--peek-w);
+    padding: var(--space-xs);
+    opacity: 0;
+    translate: 0 0.25rem;
+    pointer-events: none;
+    transition:
+      opacity var(--dur-base) var(--ease),
+      translate var(--dur-base) var(--ease);
+  }
+
+  .palette-peek-image {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
+
+  .palette-summary {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--color-muted);
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+  }
+
+  .palette-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-sm);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .palette-figure {
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .palette-figure-label {
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  /* The lit result: under the pointer or keyboard focus, or the first one at rest */
+  .palette-item:is(:hover, :focus-within) .palette-row,
+  .palette:not(:has(.palette-item:is(:hover, :focus-within))) .is-first .palette-row {
+    background-color: var(--dock-lens);
+    box-shadow: inset 0 1px 0 var(--dock-rim);
+  }
+
+  .palette-item:is(:hover, :focus-within) .palette-enter,
+  .palette:not(:has(.palette-item:is(:hover, :focus-within))) .is-first .palette-enter {
+    opacity: 1;
+  }
+
+  .palette-item:is(:hover, :focus-within) .palette-peek,
+  .palette:not(:has(.palette-item:is(:hover, :focus-within))) .is-first .palette-peek {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  /* Phones: the list is the palette. Peeks stay in the page for screen readers only. */
+  @media (max-width: 47.99rem) {
+    .palette-body {
+      min-height: 0;
+      padding-right: var(--pad);
+    }
+
+    .palette-body::after {
+      display: none;
+    }
+
+    .palette-row {
+      grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    }
+
+    .palette-org {
+      display: none;
+    }
+
+    .palette-peek {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+}

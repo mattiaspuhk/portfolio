@@ -1,0 +1,129 @@
+---
+// Selected work, on the home page, as a command palette: the dock's glass floating over a patch of
+// the radar storm, the case studies grouped by `kind` in the order site.ts lists them. The line at
+// the top is a label, not a search field, so nothing promises typing. CSS only (palette.css): the
+// result under the pointer or keyboard focus sits under the dock's lens and shows its peek on the
+// right; at rest the first result does. The storm patch is RadarBand's `patch` mode.
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import RadarBand from '@/components/apron/RadarBand.astro';
+import { site } from '@/config/site';
+import { formatPeriod, standNumber } from '@/lib/format';
+
+interface Props {
+  /** Sorted. Each group keeps this order. */
+  entries: CollectionEntry<'work'>[];
+  /** Heading level of the titles, to fit the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { entries, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+const { kind: kindLabels, metric: metricLabels } = site.labels;
+const kinds = Object.keys(kindLabels) as (keyof typeof kindLabels)[];
+
+// One group per kind that has work, then any work without a kind, unlabelled
+const groups = [
+  ...kinds.map((kind) => ({
+    id: kind,
+    label: kindLabels[kind],
+    items: entries.filter((e) => e.data.kind === kind),
+  })),
+  { id: 'other', label: undefined, items: entries.filter((e) => !e.data.kind) },
+].filter((group) => group.items.length > 0);
+const firstId = groups[0]?.items[0]?.id;
+---
+
+{groups.length > 0 && (
+  <div class="palette-field">
+    <RadarBand mode="patch" />
+    <div class="palette dock-glass">
+      <p class="palette-prompt">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+        {site.labels.home.palettePrompt}
+      </p>
+      <div class="palette-body">
+        {groups.map((group) => (
+          <div class="palette-group">
+            {group.label && (
+              <p class="palette-group-label" id={`palette-${group.id}`}>
+                {group.label}
+              </p>
+            )}
+            <ul
+              class="palette-list"
+              aria-labelledby={group.label ? `palette-${group.id}` : undefined}
+            >
+              {group.items.map((entry) => {
+                const { title, summary, org, period, order, thumb, thumbAlt, cover, coverAlt } =
+                  entry.data;
+                const metric = entry.data.metrics[0];
+                const image = thumb ?? cover;
+                const number = standNumber(order);
+                return (
+                  <li class:list={['palette-item', entry.id === firstId && 'is-first']}>
+                    <a class="palette-row" href={`/work/${entry.id}`}>
+                      {image ? (
+                        <Image
+                          class="palette-thumb"
+                          src={image}
+                          alt=""
+                          widths={[64, 128]}
+                          sizes="2.25rem"
+                        />
+                      ) : (
+                        <span class="palette-thumb" />
+                      )}
+                      <Heading
+                        class="palette-title"
+                        style={`view-transition-name: stand-${number}-title`}
+                      >
+                        {title}
+                      </Heading>
+                      <span class="palette-org">{org}</span>
+                      <kbd class="palette-enter" aria-hidden="true">
+                        ↵
+                      </kbd>
+                    </a>
+                    {/* Follows its row in reading order, so it's the summary a screen reader hears next */}
+                    <div class="palette-peek">
+                      {image && (
+                        <Image
+                          class="palette-peek-image"
+                          src={image}
+                          alt={(thumb ? thumbAlt : coverAlt) ?? ''}
+                          widths={[320, 480, 640]}
+                          sizes="17rem"
+                          style={cover ? `view-transition-name: stand-${number}` : undefined}
+                        />
+                      )}
+                      <p class="palette-summary">{summary}</p>
+                      <p class="palette-meta">
+                        <span>{formatPeriod(period, site.labels.present)}</span>
+                        {metric && (
+                          <span class="palette-figure">
+                            {metric.before && (
+                              <>
+                                <span class="sr-only">{metricLabels.before}</span>
+                                {metric.before} →{' '}
+                              </>
+                            )}
+                            <span class="sr-only">{metricLabels.after}</span>
+                            {metric.after} <span class="palette-figure-label">{metric.label}</span>
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}

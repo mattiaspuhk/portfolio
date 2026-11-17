@@ -1,0 +1,95 @@
+---
+// Selected work, on the home page, as an open index on one sheet of the dock's glass: one row per
+// case study, the title set large in the headline face with its kind and year in quiet columns,
+// and the lit project's cover on the same glass to the right, as tall as the list, with a line of
+// details under it. CSS only (work-index.css): the row under the pointer or keyboard focus glows
+// with the hero's halo and shows its cover; at rest the first row does. The summary is there for
+// screen readers only. On phones the covers drop out and each row carries its thumb.
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import { site } from '@/config/site';
+import { formatPeriod, standNumber } from '@/lib/format';
+
+interface Props {
+  /** Sorted; rows keep this order. */
+  entries: CollectionEntry<'work'>[];
+  /** Heading level of the titles, to fit the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { entries, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+const { kind: kindLabels, metric: metricLabels } = site.labels;
+
+const year = ({ start, end }: { start: Date; end?: Date }) => (end ?? start).getUTCFullYear();
+---
+
+{entries.length > 0 && (
+  <div class="work-index dock-glass">
+    <ul class="work-index-list">
+      {entries.map((entry, i) => {
+        const { title, summary, org, period, order, kind, thumb, thumbAlt, cover, coverAlt } =
+          entry.data;
+        const metric = entry.data.metrics[0];
+        const image = cover ?? thumb;
+        const number = standNumber(order);
+        return (
+          <li class:list={['work-index-item', i === 0 && 'is-first']}>
+            <a class="work-index-row" href={`/work/${entry.id}`}>
+              {thumb ? (
+                <Image
+                  class="work-index-thumb"
+                  src={thumb}
+                  alt=""
+                  widths={[80, 160]}
+                  sizes="2.5rem"
+                />
+              ) : (
+                <span class="work-index-thumb" />
+              )}
+              <Heading
+                class="work-index-title halo"
+                data-halo={title}
+                style={`view-transition-name: stand-${number}-title`}
+              >
+                {title}
+              </Heading>
+              <span class="work-index-kind">{kind && kindLabels[kind]}</span>
+              <span class="work-index-year">{year(period)}</span>
+            </a>
+            {/* Follows its row in reading order, so a screen reader hears the summary next */}
+            <div class="work-index-preview">
+              {image && (
+                <Image
+                  class="work-index-image"
+                  src={image}
+                  alt={(cover ? coverAlt : thumbAlt) ?? ''}
+                  widths={[400, 600, 800]}
+                  sizes="19rem"
+                  style={cover ? `view-transition-name: stand-${number}` : undefined}
+                />
+              )}
+              <p class="sr-only">{summary}</p>
+              <p class="work-index-meta">
+                <span>{org}</span>
+                <span>{formatPeriod(period, site.labels.present)}</span>
+                {metric && (
+                  <span class="work-index-figure">
+                    {metric.before && (
+                      <>
+                        <span class="sr-only">{metricLabels.before}</span>
+                        {metric.before} →{' '}
+                      </>
+                    )}
+                    <span class="sr-only">{metricLabels.after}</span>
+                    {metric.after} <span class="work-index-figure-label">{metric.label}</span>
+                  </span>
+                )}
+              </p>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+)}

@@ -1,6 +1,7 @@
 ---
 import { site } from '@/config/site';
 import { formatDate, isoDate } from '@/lib/format';
+import type { SchemaNode } from '@/lib/schema';
 import BaseLayout from './BaseLayout.astro';
 
 interface Props {
@@ -8,13 +9,22 @@ interface Props {
   description: string;
   updated?: Date;
   ogImage?: string;
+  type?: 'website' | 'article' | 'profile';
+  jsonLd?: SchemaNode[];
   noindex?: boolean;
 }
 
-const { title, description, updated, ogImage, noindex } = Astro.props;
+const { title, description, updated, ogImage, type, jsonLd, noindex } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description} ogImage={ogImage} noindex={noindex}>
+<BaseLayout
+  title={title}
+  description={description}
+  ogImage={ogImage}
+  type={type}
+  jsonLd={jsonLd}
+  noindex={noindex}
+>
   <article class="flex flex-col gap-(--space-lg) py-(--space-lg)">
     <header class="flex flex-col gap-(--space-xs)">
       <h1 class="text-3xl">{title}</h1>

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/:path(.*)",
+      "has": [{ "type": "host", "value": "www.mattiaspuhk.com" }],
+      "destination": "https://mattiaspuhk.com/:path",
+      "permanent": true
+    }
+  ]
+}

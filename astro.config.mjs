@@ -7,6 +7,10 @@ import { remarkReadingTime } from './src/lib/remark-reading-time.mjs';
 
 export default defineConfig({
   site: 'https://mattiaspuhk.com',
+  // One URL per page: /about, never /about/. Internal links already omit the slash; Vercel
+  // (vercel.json) redirects the slashed and .html forms here, so canonical, sitemap and links agree.
+  trailingSlash: 'never',
+  build: { format: 'file' },
   integrations: [mdx(), sitemap()],
   // The work list and Now live on the home page; old links land on their sections.
   redirects: { '/work': '/#home-work', '/now': '/#home-now' },

@@ -5,24 +5,39 @@ import Footer from '@/components/site/Footer.astro';
 import Header from '@/components/site/Header.astro';
 import Seo from '@/components/site/Seo.astro';
 import SkipLink from '@/components/site/SkipLink.astro';
+import type { SchemaNode } from '@/lib/schema';
 import '@/styles/global.css';
 
 interface Props {
   title: string;
   description: string;
-  /** Path under public/, e.g. "/og/work.png". */
+  /** Path under public/ (e.g. "/og/work.png") or an absolute URL. */
   ogImage?: string;
+  ogImageAlt?: string;
+  ogImageSize?: { width: number; height: number };
+  type?: 'website' | 'article' | 'profile';
+  /** Extra schema.org nodes for this page, see src/lib/schema.ts. */
+  jsonLd?: SchemaNode[];
   noindex?: boolean;
 }
 
-const { title, description, ogImage, noindex } = Astro.props;
+const { title, description, ogImage, ogImageAlt, ogImageSize, type, jsonLd, noindex } = Astro.props;
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <Seo title={title} description={description} ogImage={ogImage} noindex={noindex} />
+    <Seo
+      title={title}
+      description={description}
+      ogImage={ogImage}
+      ogImageAlt={ogImageAlt}
+      ogImageSize={ogImageSize}
+      type={type}
+      jsonLd={jsonLd}
+      noindex={noindex}
+    />
     <Font cssVariable="--font-body" preload={[{ style: 'normal' }]} />
     <Font cssVariable="--font-code" />
     <script is:inline>

@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { site } from '@/config/site';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { byOrder } from '@/lib/content';
+import { breadcrumbs, canonicalUrl, profilePage } from '@/lib/schema';
 import { formatRange, formatYearMonth } from '@/lib/format';
 
 const entries = (await getCollection('cv')).sort(byOrder);
@@ -15,9 +16,11 @@ const sections = (['experience', 'education', 'skills', 'activities'] as const)
   }))
   .filter((section) => section.items.length > 0);
 const { title, description } = site.pages.cv;
+const pageUrl = canonicalUrl(Astro.url);
+const jsonLd = [profilePage(pageUrl), breadcrumbs([{ name: title, url: pageUrl }])];
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} type="profile" jsonLd={jsonLd}>
   <article class="flex flex-col gap-(--space-xl) py-(--space-lg)">
     <header class="flex flex-wrap items-baseline justify-between gap-(--space-sm)">
       <h1 class="text-3xl">{title}</h1>

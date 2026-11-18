@@ -1,10 +1,12 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { getImage } from 'astro:assets';
 import { site } from '@/config/site';
 import TerminalDive from '@/components/apron/TerminalDive.astro';
 import BeatNav from '@/components/work/BeatNav.astro';
 import Pager from '@/components/work/Pager.astro';
 import SummaryCard from '@/components/work/SummaryCard.astro';
+import { breadcrumbs, canonicalUrl, caseStudy } from '@/lib/schema';
 import BaseLayout from './BaseLayout.astro';
 
 type Work = CollectionEntry<'work'>;
@@ -21,9 +23,31 @@ interface Props {
 const { entry, minutesRead, prev, next, beats } = Astro.props;
 const { title, summary, order, org, role, period, stack, metrics, cover, coverAlt, tldr, disclosure, kind } = entry.data;
 const toLink = (work?: Work) => work && { href: `/work/${work.id}`, title: work.data.title };
+
+// Share image: the cover scaled to fit inside 1200×630, flattened onto black as a small JPEG.
+const ogScale = cover ? Math.min(1200 / cover.width, 630 / cover.height, 1) : 1;
+const ogSize = cover && {
+  width: Math.round(cover.width * ogScale),
+  height: Math.round(cover.height * ogScale),
+};
+const og =
+  cover &&
+  ogSize &&
+  (await getImage({ src: cover, ...ogSize, background: '#000000', format: 'jpg', quality: 85 }));
+const pageUrl = canonicalUrl(Astro.url);
+const ogUrl = og ? new URL(og.src, Astro.site) : undefined;
+const jsonLd = [caseStudy(entry, pageUrl, ogUrl), breadcrumbs([{ name: title, url: pageUrl }])];
 ---
 
-<BaseLayout title={title} description={summary}>
+<BaseLayout
+  title={title}
+  description={summary}
+  type="article"
+  ogImage={og?.src}
+  ogImageAlt={og ? coverAlt : undefined}
+  ogImageSize={og ? ogSize : undefined}
+  jsonLd={jsonLd}
+>
   <TerminalDive entry={entry} />
   <article class="flex flex-col gap-(--space-xl) py-(--space-lg)">
     <SummaryCard

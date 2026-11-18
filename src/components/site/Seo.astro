@@ -30,7 +30,8 @@ const {
 
 const fullTitle = title === site.name ? site.name : `${title} · ${site.name}`;
 const canonical = canonicalUrl(Astro.url);
-const image = new URL(ogImage ?? '/og/default.png', Astro.site);
+// `?v=` changes whenever og/default.png does: WhatsApp and other apps cache share images by URL.
+const image = new URL(ogImage ?? '/og/default.png?v=2', Astro.site);
 const imageSize = ogImageSize ?? (ogImage ? undefined : { width: 1200, height: 630 });
 // The default image is the home hero (docs/scripts/capture-og.mjs), so its alt is the hero's words.
 const imageAlt = ogImageAlt ?? (ogImage ? undefined : `${site.labels.home.introTitle} ${site.labels.home.intro}`);

@@ -7,7 +7,7 @@ export const site = {
   name: 'Mattias Puhk',
   url: import.meta.env.SITE, // set `site` in astro.config.mjs
   description:
-    'Mattias Puhk is a full-stack engineer in London. Case studies of the AI features he built for GAIA, with the decisions behind them and what broke.',
+    'Mattias Puhk, a product engineer from Estonia, now in London doing an MSc at LSE.',
   email: 'mattias.puhk@gmail.com',
 
   socials: [

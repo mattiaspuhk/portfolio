@@ -26,7 +26,7 @@ const work = defineCollection({
         metrics: z.array(metric).max(4).default([]),
         cover: image().optional(),
         coverAlt: z.string().optional(),
-        /** Home page monitor only: one UI moment filling the screen. Falls back to cover. */
+        /** Home page work index only: UI cut from the cover on transparency. Falls back to cover. */
         thumb: image().optional(),
         thumbAlt: z.string().optional(),
         disclosure: z.enum(['mock-data', 'concept']).optional(), // renders its notice on the page

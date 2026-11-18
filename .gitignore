@@ -19,3 +19,4 @@ _private/
 # Project docs stay local: product and design records, agent guides, Impeccable's data
 /docs/
 /.impeccable/
+.vercel

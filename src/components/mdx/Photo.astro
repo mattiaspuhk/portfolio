@@ -1,0 +1,76 @@
+---
+/**
+ * A personal photo as a tilted print. On wide screens it hangs in the empty space right of the
+ * prose column, level with where it sits in the MDX (put it straight after a section's H2). On
+ * mid widths the text wraps around it, and on phones it sits on its own between paragraphs.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  /** Degrees. Positive tilts clockwise; alternate the sign when photos follow each other. */
+  tilt?: number;
+}
+
+const { src, alt, caption, tilt = 2.5 } = Astro.props;
+---
+
+<figure class="photo" style={`--tilt: ${tilt}deg`}>
+  <Image src={src} alt={alt} widths={[320, 480, 640]} sizes="(min-width: 40rem) 16rem, 80vw" />
+  {caption && <figcaption class="fineprint">{caption}</figcaption>}
+</figure>
+
+<style>
+  .photo {
+    /* The print's paper. Neutral in both themes, so the photo is the only thing with colour. */
+    --print-frame: var(--color-surface);
+    --print-width: 16rem;
+
+    width: min(var(--print-width), 80%);
+    margin-block: var(--space-lg);
+    margin-inline: auto;
+    padding: var(--space-xs) var(--space-xs) 0;
+    background: var(--print-frame);
+    border: var(--border-width) solid var(--color-border);
+    box-shadow: 0 0.75rem 1.5rem -0.75rem rgb(0 0 0 / 0.35);
+    transform: rotate(var(--tilt));
+  }
+
+  .photo :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .photo figcaption {
+    margin: 0;
+    padding-block: var(--space-xs) var(--space-sm);
+    color: var(--color-muted);
+  }
+
+  /* No print on the line: the paragraph after it keeps normal spacing */
+  :global(.prose) > .photo + :global(*) {
+    margin-block-start: var(--space-md);
+  }
+
+  /* Text wraps around the print */
+  @media (min-width: 40rem) {
+    .photo {
+      float: right;
+      clear: right;
+      width: 14rem;
+      margin: var(--space-xs) 0 var(--space-md) var(--space-lg);
+    }
+  }
+
+  /* The print leaves the column and hangs in the space to its right */
+  @media (min-width: 64rem) {
+    .photo {
+      width: var(--print-width);
+      margin-inline: 0 calc(-1 * (var(--print-width) + var(--space-xl)));
+    }
+  }
+</style>

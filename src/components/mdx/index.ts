@@ -3,5 +3,6 @@ import Aside from './Aside.astro';
 import Decision from './Decision.astro';
 import Figure from './Figure.astro';
 import Metric from './Metric.astro';
+import Photo from './Photo.astro';
 
-export const mdxComponents = { Figure, Metric, Decision, Aside };
+export const mdxComponents = { Figure, Metric, Decision, Aside, Photo };

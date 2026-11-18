@@ -3,9 +3,9 @@
  * dock's glass (the one recipe, dock.css, rounded like a card). Titles in the headline's light face
  * between faint hairlines, kind and year in quiet columns. The row under the pointer glows with the
  * hero's halo; with nothing pointed at, the row under keyboard focus; with neither, the first. The
- * lit row's thumb shows on the same glass to the right, as tall as the list, over a three-line
- * caption. Previews are stacked there and only the lit one shows. CSS only. On phones the previews
- * drop out and each row carries its thumb.
+ * lit row's thumb, UI cut out on transparency, shows on the same glass to the right, level with the
+ * titles, over a centred caption. Previews are stacked there and only the lit one shows. CSS only.
+ * On phones the previews drop out and each row carries its thumb.
  */
 @layer components {
   .work-index.dock-glass {
@@ -65,11 +65,13 @@
     transition: opacity var(--dur-base) var(--ease);
   }
 
-  /* Every preview takes the same box: the right of the glass, top and bottom level with the list */
+  /* Every preview takes the same box on the right of the glass, inset like the titles: its top
+     level with the first title's, its bottom with the last title's. */
   .work-index-preview {
+    --inset-block: calc(var(--space-xs) + var(--space-md));
     position: absolute;
-    top: var(--space-xs);
-    bottom: var(--space-xs);
+    top: var(--inset-block);
+    bottom: var(--inset-block);
     right: var(--space-lg);
     display: flex;
     flex-direction: column;
@@ -84,30 +86,26 @@
       translate var(--dur-base) var(--ease);
   }
 
-  /* The image takes whatever height the caption leaves. Thumbs are composed on a plain ground with
-     room round the UI, so the crop only ever trims ground. */
+  /* The image takes whatever height the caption leaves. Thumbs are UI cut out on transparency, so
+     they sit straight on the glass in either theme, whole and centred. */
   .work-index-image {
     flex: 1 1 0;
     min-height: 0;
     width: 100%;
     height: auto;
-    border-radius: var(--radius-lg);
-    object-fit: cover;
-    box-shadow: var(--screen-shadow);
+    object-fit: contain;
   }
 
-  /* Three short lines, each kept to one: what I did, where and when, the number. The block is
-     always three lines tall so every image above it is the same size. */
+  /* Up to three short lines, each kept to one and centred under the image: what I did, where and
+     when, the number */
   .work-index-caption {
-    --caption-line: calc(var(--text-xs) * 1.5);
     display: flex;
     flex: none;
     flex-direction: column;
     gap: 0.125rem;
-    height: calc(var(--caption-line) * 3 + 0.25rem);
-    padding-inline: 0.125rem;
     font-size: var(--text-xs);
-    line-height: var(--caption-line);
+    line-height: 1.5;
+    text-align: center;
     font-variant-numeric: tabular-nums;
   }
 

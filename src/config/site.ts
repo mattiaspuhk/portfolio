@@ -35,9 +35,10 @@ export const site = {
     present: 'Present', // end of a period with no end date
     mockData: 'Mock data', // small label on <Figure mock>
     mockDataNotice: 'Every screenshot on this page uses mock data, not customer data.', // notice on case studies with `disclosure: mock-data`
-    concept: 'TODO(mattias)', // notice on case studies with `disclosure: concept`
+    concept: '', // notice on case studies with `disclosure: concept`; hidden while empty
     beatNav: 'On this page', // aria-label of the case study beat nav
     pager: { label: 'More case studies', prev: 'Previous', next: 'Next' },
+    back: 'Back', // link at the top of every page but home
     summary: {
       org: 'Company',
       role: 'Role',

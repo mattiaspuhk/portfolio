@@ -3,8 +3,8 @@
  * dock's glass (the one recipe, dock.css, rounded like a card). Titles in the headline's light face
  * between faint hairlines, kind and year in quiet columns. The row under the pointer glows with the
  * hero's halo; with nothing pointed at, the row under keyboard focus; with neither, the first. The
- * lit row's cover shows on the same glass to the right, as tall as the list, with a line of details
- * under it. Previews are stacked there and only the lit one shows. CSS only. On phones the covers
+ * lit row's thumb shows on the same glass to the right, as tall as the list, over a three-line
+ * caption. Previews are stacked there and only the lit one shows. CSS only. On phones the previews
  * drop out and each row carries its thumb.
  */
 @layer components {
@@ -73,8 +73,9 @@
     right: var(--space-lg);
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
+    gap: var(--space-sm);
     width: var(--preview-w);
+    margin: 0;
     opacity: 0;
     translate: 0 0.25rem;
     pointer-events: none;
@@ -83,7 +84,8 @@
       translate var(--dur-base) var(--ease);
   }
 
-  /* The cover takes whatever height the details leave */
+  /* The image takes whatever height the caption leaves. Thumbs are composed on a plain ground with
+     room round the UI, so the crop only ever trims ground. */
   .work-index-image {
     flex: 1 1 0;
     min-height: 0;
@@ -94,13 +96,34 @@
     box-shadow: var(--screen-shadow);
   }
 
-  .work-index-meta {
+  /* Three short lines, each kept to one: what I did, where and when, the number. The block is
+     always three lines tall so every image above it is the same size. */
+  .work-index-caption {
+    --caption-line: calc(var(--text-xs) * 1.5);
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem var(--space-sm);
+    flex: none;
+    flex-direction: column;
+    gap: 0.125rem;
+    height: calc(var(--caption-line) * 3 + 0.25rem);
+    padding-inline: 0.125rem;
     font-size: var(--text-xs);
-    color: var(--color-muted);
+    line-height: var(--caption-line);
     font-variant-numeric: tabular-nums;
+  }
+
+  .work-index-caption > * {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .work-index-role {
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .work-index-meta {
+    color: var(--color-muted);
   }
 
   .work-index-figure {

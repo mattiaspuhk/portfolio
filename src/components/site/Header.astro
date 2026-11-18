@@ -1,10 +1,11 @@
 ---
-// The name at the top of the page, except on the home page, where the headline is the name. The nav
+// A back link at the top of every page but home. From a case study it goes to the work section. The nav
 // and the theme toggle float in the dock at the bottom of the window (dock.css); they stay in the
-// header's markup so they come right after the name in tab order and print.css still hides them
+// header's markup so they come right after the back link in tab order and print.css still hides them
 // with the header.
 import { site } from '@/config/site';
 import { getPublished } from '@/lib/content';
+import Arrow from './Arrow.astro';
 import Nav from './Nav.astro';
 import ThemeToggle from './ThemeToggle.astro';
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const { currentPath } = Astro.props;
+const backHref = currentPath.startsWith('/work') ? '/#home-work' : '/';
 
 // A link to an empty index page is a dead end, so items tied to a collection wait for a first entry.
 const nav = [];
@@ -23,7 +25,14 @@ for (const item of site.nav) {
 ---
 
 <header class="site-header mx-auto w-full max-w-(--page-width) px-(--gutter) py-(--space-md)">
-  {currentPath !== '/' && <a href="/">{site.name}</a>}
+  {
+    currentPath !== '/' && (
+      <a href={backHref} class="inline-flex items-center gap-(--space-xs)">
+        <Arrow direction="left" class="size-[1em]" />
+        {site.labels.back}
+      </a>
+    )
+  }
   <div class="dock">
     <Nav items={nav} label={site.labels.mainNav} currentPath={currentPath} />
     <ThemeToggle label={site.labels.themeToggle} class="dock-glass dock-toggle">

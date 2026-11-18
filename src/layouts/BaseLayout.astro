@@ -5,7 +5,7 @@ import Footer from '@/components/site/Footer.astro';
 import Header from '@/components/site/Header.astro';
 import Seo from '@/components/site/Seo.astro';
 import SkipLink from '@/components/site/SkipLink.astro';
-import type { SchemaNode } from '@/lib/schema';
+import { canonicalUrl, type SchemaNode } from '@/lib/schema';
 import '@/styles/global.css';
 
 interface Props {
@@ -82,7 +82,7 @@ const { title, description, ogImage, ogImageAlt, ogImageSize, type, jsonLd, noin
   </head>
   <body class="flex min-h-dvh flex-col">
     <SkipLink label={site.labels.skipLink} />
-    <Header currentPath={Astro.url.pathname} />
+    <Header currentPath={canonicalUrl(Astro.url).pathname} />
     <main id="main" tabindex="-1" class="mx-auto w-full max-w-(--page-width) flex-1 px-(--gutter)">
       <slot />
     </main>
